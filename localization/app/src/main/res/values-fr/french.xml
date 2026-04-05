@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<!--    <string name="usr_name">Nom</string>-->
+    <string name="usr_name" translatable="false">Nom</string>
+
+</resources>

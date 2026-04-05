@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name" translatable="false">send</string>
+    <string name="message_name" translatable="false">receive</string>
+    <string name="delete_name" translatable="false">delete</string>
+</resources>

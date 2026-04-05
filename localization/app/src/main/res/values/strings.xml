@@ -1,0 +1,7 @@
+
+<resources>
+    <string name="app_name" translatable="false">Localization</string>
+    <string name="usr_name">Name</string>
+<!--    <string name="usr_city">Location</string>-->
+<!--    <string name="usr_country">Location</string>-->
+</resources>

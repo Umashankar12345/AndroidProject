@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Application Snackbar</string>
+    <string name="home">Accueil</string>
+    <string name="profile">Profil</string>
+    <string name="welcome">Bienvenue</string>
+    <string name="User_city">Afficher le Snackbar</string>
+    <string name="smart_city">Ville intelligente</string>
+</resources>

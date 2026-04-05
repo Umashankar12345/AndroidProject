@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="20dp" >
+
+<ImageView
+    android:layout_width="120dp"
+    android:layout_height="100dp"
+    android:layout_gravity="center"
+    android:src="@mipmap/ic_launcher"
+    android:contentDescription="App Logo"/>
+
+    <EditText
+        android:id="@+id/etUsername"
+     
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="UserName"
+
+        android:inputType="textPersonName"/>
+    
+    <EditText
+        android:id="@+id/etPassword"
+        android:hint="Password"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        />
+    
+    <EditText
+        android:id="@+id/etAge"
+        android:hint="AGE"
+        android:inputType="number"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    
+    <EditText
+        android:id="@+id/etPhone"
+        android:hint="Phone Number"
+        android:inputType="phone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    
+   <RadioGroup
+       android:id="@+id/radioGroup"
+       android:orientation="horizontal"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content" >
+
+       <RadioButton
+           android:id="@+id/rbMale"
+           android:layout_width="wrap_content"
+           android:layout_height="match_parent"
+           android:text="Male" />
+       <RadioButton
+           android:id="@+id/rbFemale"
+           android:layout_width="wrap_content"
+           android:layout_height="match_parent"
+           android:text="Female" />
+   </RadioGroup>
+    <Button
+    android:id="@+id/btnSubmit"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:text="Submit" />
+
+</LinearLayout>

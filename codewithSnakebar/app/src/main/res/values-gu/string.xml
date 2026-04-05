@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">સ્નેકબાર એપ</string>
+    <string name="home">મુખ્ય પૃષ્ઠ</string>
+    <string name="profile">પ્રોફાઇલ</string>
+    <string name="welcome">સ્વાગત છે</string>
+    <string name="User_city">સ્નેકબાર બતાવો</string>
+    <string name="smart_city">સ્માર્ટ સિટી</string>
+
+</resources>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Snackbar App</string>
+    <string name="home">Home</string>
+    <string name="profile">Profile</string>
+    <string name="welcome">Welcome</string>
+    <string name="User_city">Show Snackbar</string>
+    <string name="smart_city">Smart City</string>
+
+</resources>

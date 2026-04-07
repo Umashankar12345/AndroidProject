@@ -5,13 +5,15 @@ plugins {
 }
 
 android {
-    namespace = "com.example.alarmset"
-    compileSdk = 35
+    namespace = "com.example.unit1lazyrow"
+    compileSdk {
+        version = release(36)
+    }
 
     defaultConfig {
-        applicationId = "com.example.alarmset"
+        applicationId = "com.example.unit1lazyrow"
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -40,27 +42,19 @@ android {
 }
 
 dependencies {
-    // These names are derived from your [libraries] section
-    // TOML: androidx-core-ktx -> Gradle: libs.androidx.core.ktx
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
-
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
-
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
-
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 }
-
-// Keep this to fix the testClasses error
-tasks.register("testClasses") {}

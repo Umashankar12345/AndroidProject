@@ -9,7 +9,10 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListPrefetchStrategy
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
@@ -29,25 +32,50 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
          // ScrollExample()
-            HorizontalScrollExaple()
+            //HorizontalScrollExaple()
+            NestedScrollExample()
         }
     }
 }
 
 @Composable
-fun HorizontalScrollExaple() {
+fun  NestedScrollExample(){
     val scrollState = rememberScrollState()
-Row(modifier = Modifier.fillMaxSize()
-    .horizontalScroll(scrollState).padding(16.dp)) {
-    for(i in 1..20){
-        Text(
-            text = "item $i",
-            fontSize =  20.sp,
-            modifier = Modifier.padding(8.dp)
-        )
+
+    Column(
+        modifier = Modifier.fillMaxSize()
+            .verticalScroll(scrollState).padding(16.dp)
+    ) {
+        Text(text =  "Top Section", fontSize = 24.sp,
+            modifier = Modifier.padding(10.dp))
+
+        LazyColumn(modifier = Modifier.height(300.dp)) {
+            items(20){
+                index-> Text(
+                    text =  "Nested item $index",
+                    fontSize = 20.sp,
+                    modifier = Modifier.padding(10.dp)
+                )
+            }
+        }
+        Text(text = "Bottom Section",
+            fontSize = 24.sp,
+            modifier = Modifier.padding(10.dp))
     }
 }
-}
+//fun HorizontalScrollExaple() {
+//    val scrollState = rememberScrollState()
+//Row(modifier = Modifier.fillMaxSize()
+//    .horizontalScroll(scrollState).padding(16.dp)) {
+//    for(i in 1..20){
+//        Text(
+//            text = "item $i",
+//            fontSize =  20.sp,
+//            modifier = Modifier.padding(8.dp)
+//        )
+//    }
+//}
+//}
 //fun  ScrollExample() {
 //    val scrollState = rememberScrollState()
 //

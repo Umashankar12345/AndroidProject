@@ -1,3 +1,6 @@
+package com.example.nearmeet.ui.home
+
+//package com.example.nearmeet.ui.home
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn

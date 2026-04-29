@@ -2,20 +2,19 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    // Use aliases instead of id(...)
     alias(libs.plugins.google.services)
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.ksp)
 }
 
 android {
-    namespace = "com.nearmeet"
-    compileSdk = 35
+    namespace = "com.example.nearmeet"
+    compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.nearmeet"
+        applicationId = "com.example.nearmeet"
         minSdk = 24
-        targetSdk = 35 // Changed from 36 to 35 (Stable)
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -44,7 +43,7 @@ android {
 }
 
 dependencies {
-    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.core-ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))

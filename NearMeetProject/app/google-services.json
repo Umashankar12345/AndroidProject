@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1014548815309",
+    "project_id": "nearmeet-ea934",
+    "storage_bucket": "nearmeet-ea934.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1014548815309:android:72ab808f6018ffab2ff884",
+        "android_client_info": {
+          "package_name": "com.example.nearmeet"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAqB22F8SvFA1LGqae8ChWopQEgt7A4t8Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

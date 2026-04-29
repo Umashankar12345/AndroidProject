@@ -1,4 +1,3 @@
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -9,11 +8,13 @@ plugins {
 }
 
 android {
-    namespace = "com.nearmeet" // Make sure this matches your actual package name
+    // This MUST match the package_name in google-services.json
+    namespace = "com.example.nearmeet"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.nearmeet"
+        // This MUST match the package_name in google-services.json
+        applicationId = "com.example.nearmeet"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
@@ -31,20 +32,23 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
     kotlinOptions {
         jvmTarget = "11"
     }
+
     buildFeatures {
         compose = true
     }
 }
 
 dependencies {
-    // Correct Version Catalog Accessors (Dots, not hyphens)
+    // Correct Version Catalog Accessors
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -62,7 +66,7 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
-    // Firebase (Modern artifacts without -ktx suffix)
+    // Firebase (Using BoM for version management)
     implementation(platform("com.google.firebase:firebase-bom:33.3.0"))
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
@@ -73,12 +77,12 @@ dependencies {
     implementation("com.google.android.gms:play-services-maps:19.0.0")
     implementation("com.google.android.gms:play-services-location:21.3.0")
 
-    // Hilt
+    // Hilt Dependency Injection
     implementation("com.google.dagger:hilt-android:2.51.1")
     ksp("com.google.dagger:hilt-compiler:2.51.1")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 
-    // Room
+    // Room Database
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
     ksp("androidx.room:room-compiler:2.6.1")
@@ -86,10 +90,10 @@ dependencies {
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
 
-    // Coil
+    // Image Loading (Coil)
     implementation("io.coil-kt:coil-compose:2.7.0")
 
-    // WorkManager
+    // Background Tasks
     implementation("androidx.work:work-runtime-ktx:2.9.1")
 
     // Navigation

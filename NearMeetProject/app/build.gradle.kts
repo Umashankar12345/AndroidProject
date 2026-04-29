@@ -1,3 +1,4 @@
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -8,13 +9,13 @@ plugins {
 }
 
 android {
-    namespace = "com.example.nearmeet"
+    namespace = "com.nearmeet" // Make sure this matches your actual package name
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.nearmeet"
+        applicationId = "com.nearmeet"
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -43,7 +44,8 @@ android {
 }
 
 dependencies {
-    implementation(libs.androidx.core-ktx)
+    // Correct Version Catalog Accessors (Dots, not hyphens)
+    implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
@@ -60,11 +62,11 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
-    // Firebase
+    // Firebase (Modern artifacts without -ktx suffix)
     implementation(platform("com.google.firebase:firebase-bom:33.3.0"))
-    implementation("com.google.firebase:firebase-auth-ktx")
-    implementation("com.google.firebase:firebase-firestore-ktx")
-    implementation("com.google.firebase:firebase-messaging-ktx")
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.firebase:firebase-messaging")
 
     // Google Maps
     implementation("com.google.maps.android:maps-compose:6.1.0")

@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.example.nearmeet.data.local.EventDao
 import com.example.nearmeet.data.local.NearMeetDatabase
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.Module
 import dagger.Provides
@@ -20,6 +21,11 @@ object AppModule {
     @Singleton
     fun provideFirestore(): FirebaseFirestore =
         FirebaseFirestore.getInstance()
+
+    @Provides
+    @Singleton
+    fun provideFirebaseAuth(): FirebaseAuth =
+        FirebaseAuth.getInstance()
 
     @Provides
     @Singleton

@@ -1,11 +1,11 @@
 package com.example.nearmeet.ui.navigation
 
-
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.nearmeet.ui.auth.LoginScreen
 import com.example.nearmeet.ui.home.HomeScreen
 
 sealed class Screen(val route: String) {
@@ -18,12 +18,22 @@ sealed class Screen(val route: String) {
 
 @Composable
 fun NearMeetNavGraph(
-    navController: NavHostController = rememberNavController()
+    navController: NavHostController = rememberNavController(),
+    startDestination: String = Screen.Login.route
 ) {
     NavHost(
         navController = navController,
-        startDestination = Screen.Home.route
+        startDestination = startDestination
     ) {
+        composable(Screen.Login.route) {
+            LoginScreen(
+                onLoginSuccess = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Login.route) { inclusive = true }
+                    }
+                }
+            )
+        }
         composable(Screen.Home.route) {
             HomeScreen()
         }
@@ -32,9 +42,6 @@ fun NearMeetNavGraph(
         }
         composable(Screen.Profile.route) {
             // ProfileScreen()
-        }
-        composable(Screen.Login.route) {
-            // LoginScreen()
         }
     }
 }

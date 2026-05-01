@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.nearmeet.data.model.Event
 import com.example.nearmeet.domain.usecase.GetNearbyEventsUseCase
+import com.example.nearmeet.domain.util.EventRecommendation
 import com.example.nearmeet.domain.util.LocationManager
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,7 +18,8 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val getNearbyEvents: GetNearbyEventsUseCase,
-    private val locationManager: LocationManager
+    private val locationManager: LocationManager,
+    private val eventRecommendation: EventRecommendation
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -44,7 +46,13 @@ class HomeViewModel @Inject constructor(
                 }
                 _uiState.update { state ->
                     val filtered = filterEvents(events, state.searchQuery, state.selectedCategory)
-                    state.copy(nearbyEvents = events, filteredEvents = filtered)
+                    // For now, we use a stub for RSVP'd events to show recommendations
+                    val recommended = eventRecommendation.getRecommendedEvents(events, emptyList()) 
+                    state.copy(
+                        nearbyEvents = events, 
+                        filteredEvents = filtered,
+                        recommendedEvents = recommended
+                    )
                 }
             }
         }

@@ -6,6 +6,7 @@ import com.google.android.gms.maps.model.LatLng
 data class HomeUiState(
     val nearbyEvents: List<Event> = emptyList(),
     val filteredEvents: List<Event> = emptyList(),
+    val recommendedEvents: List<Event> = emptyList(),
     val isLoading: Boolean = false,
     val searchQuery: String = "",
     val selectedCategory: String = "All",

@@ -17,11 +17,29 @@ class AuthViewModel @Inject constructor(
     private val _isLoggedIn = MutableStateFlow(authRepository.isUserLoggedIn)
     val isLoggedIn: StateFlow<Boolean> = _isLoggedIn
 
-    fun loginAnonymously() {
-        authRepository.loginAnonymously { success ->
-            if (success) {
-                _isLoggedIn.value = true
-            }
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error
+
+    fun login(email: String, pass: String) {
+        authRepository.loginWithEmail(email, pass) { success, msg ->
+            if (success) _isLoggedIn.value = true
+            else _error.value = msg
         }
+    }
+
+    fun signUp(email: String, pass: String) {
+        authRepository.signUpWithEmail(email, pass) { success, msg ->
+            if (success) _isLoggedIn.value = true
+            else _error.value = msg
+        }
+    }
+
+    fun clearError() {
+        _error.value = null
+    }
+
+    fun logout() {
+        authRepository.logout()
+        _isLoggedIn.value = false
     }
 }

@@ -1,6 +1,5 @@
 package com.example.nearmeet.data.repository
 
-
 import com.example.nearmeet.data.local.EventDao
 import com.example.nearmeet.data.local.EventEntity
 import com.example.nearmeet.data.model.Event
@@ -34,4 +33,16 @@ class EventRepository @Inject constructor(
 
     fun getLocalEvents(): Flow<List<EventEntity>> =
         dao.getAllEvents()
+
+    suspend fun createEvent(event: Event) {
+        remote.createEvent(event)
+    }
+
+    suspend fun getEventById(eventId: String): Event? {
+        return remote.getEventById(eventId)
+    }
+
+    suspend fun rsvpToEvent(eventId: String, userId: String) {
+        remote.rsvpToEvent(eventId, userId)
+    }
 }

@@ -20,10 +20,17 @@ class AuthRepository @Inject constructor(
         }
     }
 
-    fun loginAnonymously(onComplete: (Boolean) -> Unit) {
-        auth.signInAnonymously()
+    fun loginWithEmail(email: String, pass: String, onComplete: (Boolean, String?) -> Unit) {
+        auth.signInWithEmailAndPassword(email, pass)
             .addOnCompleteListener { task ->
-                onComplete(task.isSuccessful)
+                onComplete(task.isSuccessful, task.exception?.message)
+            }
+    }
+
+    fun signUpWithEmail(email: String, pass: String, onComplete: (Boolean, String?) -> Unit) {
+        auth.createUserWithEmailAndPassword(email, pass)
+            .addOnCompleteListener { task ->
+                onComplete(task.isSuccessful, task.exception?.message)
             }
     }
 

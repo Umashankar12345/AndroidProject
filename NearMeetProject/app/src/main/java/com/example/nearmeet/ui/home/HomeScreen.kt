@@ -5,6 +5,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ChevronRight
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -17,6 +19,7 @@ import com.example.nearmeet.data.model.Event
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.*
+import com.google.maps.android.heatmaps.HeatmapTileProvider
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -28,6 +31,7 @@ fun HomeScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showMap by remember { mutableStateOf(true) }
+    var showHeatmap by remember { mutableStateOf(false) }
     val categories = listOf("All", "Music", "Sports", "Food", "Art", "Tech", "Social")
 
     val displayEvents = if (uiState.filteredEvents.isNotEmpty() ||
@@ -58,7 +62,7 @@ fun HomeScreen(
                 NavigationBarItem(
                     selected = !showMap,
                     onClick = { showMap = false },
-                    icon = { Icon(Icons.Default.List, null) },
+                    icon = { Icon(Icons.AutoMirrored.Filled.List, null) },
                     label = { Text("List") }
                 )
                 NavigationBarItem(
@@ -127,20 +131,49 @@ fun HomeScreen(
                         cameraPositionState = cameraPositionState,
                         uiSettings = MapUiSettings(zoomControlsEnabled = true)
                     ) {
-                        displayEvents.forEach { event ->
-                            Marker(
-                                state = MarkerState(
-                                    position = LatLng(event.lat, event.lng)
-                                ),
-                                title = event.title,
-                                snippet = "${event.category} • ${event.attendees.size} going",
-                                onClick = {
-                                    onEventClick(event.id)
-                                    true
-                                }
+                        if (showHeatmap && displayEvents.isNotEmpty()) {
+                            val heatmapData = displayEvents.map {
+                                LatLng(it.lat, it.lng)
+                            }
+                            val provider = HeatmapTileProvider.Builder()
+                                .data(heatmapData)
+                                .build()
+                            TileOverlay(
+                                tileProvider = provider,
+                                state = rememberTileOverlayState()
                             )
+                        } else {
+                            displayEvents.forEach { event ->
+                                Marker(
+                                    state = MarkerState(
+                                        position = LatLng(event.lat, event.lng)
+                                    ),
+                                    title = event.title,
+                                    snippet = "${event.category} • ${event.attendees.size} going",
+                                    onClick = {
+                                        onEventClick(event.id)
+                                        true
+                                    }
+                                )
+                            }
                         }
                     }
+
+                    // Heatmap toggle button
+                    FloatingActionButton(
+                        onClick = { showHeatmap = !showHeatmap },
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(16.dp)
+                            .padding(bottom = 16.dp), // Adjusted padding to not overlap with nav bar
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer
+                    ) {
+                        Icon(
+                            if (showHeatmap) Icons.Default.Map else Icons.Default.Whatshot,
+                            contentDescription = "Toggle heatmap"
+                        )
+                    }
+
                     if (uiState.isLoading) {
                         CircularProgressIndicator(
                             modifier = Modifier.align(Alignment.Center)
@@ -149,31 +182,55 @@ fun HomeScreen(
                 }
             } else {
                 // List view
-                if (displayEvents.isEmpty()) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(
-                                Icons.Default.EventBusy,
-                                null,
-                                modifier = Modifier.size(48.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Spacer(Modifier.height(8.dp))
+                LazyColumn(
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    // Recommended section (AI)
+                    if (uiState.recommendedEvents.isNotEmpty() && uiState.searchQuery.isEmpty() && uiState.selectedCategory == "All") {
+                        item {
                             Text(
-                                "No events nearby",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                "Recommended for you",
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.padding(vertical = 8.dp)
                             )
+                            LazyRow(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                items(uiState.recommendedEvents) { event ->
+                                    RecommendationCard(event = event, onClick = { onEventClick(event.id) })
+                                }
+                            }
+                            Spacer(Modifier.height(16.dp))
+                            Divider()
+                            Spacer(Modifier.height(8.dp))
                         }
                     }
-                } else {
-                    LazyColumn(
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
+
+                    if (displayEvents.isEmpty()) {
+                        item {
+                            Box(
+                                modifier = Modifier.fillMaxWidth().height(200.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Icon(
+                                        Icons.Default.EventBusy,
+                                        null,
+                                        modifier = Modifier.size(48.dp),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    Spacer(Modifier.height(8.dp))
+                                    Text(
+                                        "No events nearby",
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
+                    } else {
                         items(displayEvents, key = { it.id }) { event ->
                             EventCard(
                                 event = event,
@@ -183,6 +240,41 @@ fun HomeScreen(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun RecommendationCard(event: Event, onClick: () -> Unit) {
+    Card(
+        onClick = onClick,
+        modifier = Modifier.width(200.dp)
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(80.dp)
+                    .padding(bottom = 8.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    Icons.Default.AutoAwesome,
+                    contentDescription = null,
+                    modifier = Modifier.size(32.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+            Text(
+                event.title,
+                style = MaterialTheme.typography.titleSmall,
+                maxLines = 1
+            )
+            Text(
+                event.category,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary
+            )
         }
     }
 }
@@ -228,7 +320,7 @@ fun EventCard(event: Event, onClick: () -> Unit) {
                 )
             }
             Icon(
-                Icons.Default.ChevronRight,
+                Icons.AutoMirrored.Filled.ChevronRight,
                 null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )

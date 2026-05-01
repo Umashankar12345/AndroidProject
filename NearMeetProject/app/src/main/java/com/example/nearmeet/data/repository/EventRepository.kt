@@ -16,19 +16,23 @@ class EventRepository @Inject constructor(
         lng: Double,
         radiusKm: Double
     ) {
-        val events = remote.getNearbyEvents(lat, lng, radiusKm)
-        val entities = events.map {
-            EventEntity(
-                id = it.id,
-                title = it.title,
-                category = it.category,
-                lat = it.lat,
-                lng = it.lng,
-                dateTime = it.dateTime,
-                attendeeCount = it.attendees.size
-            )
+        try {
+            val events = remote.getNearbyEvents(lat, lng, radiusKm)
+            val entities = events.map {
+                EventEntity(
+                    id = it.id,
+                    title = it.title,
+                    category = it.category,
+                    lat = it.lat,
+                    lng = it.lng,
+                    dateTime = it.dateTime,
+                    attendeeCount = it.attendees.size
+                )
+            }
+            dao.upsertEvents(entities)
+        } catch (e: Exception) {
+            // Ignore error for offline support, local data will be used
         }
-        dao.upsertEvents(entities)
     }
 
     fun getLocalEvents(): Flow<List<EventEntity>> =
@@ -44,5 +48,17 @@ class EventRepository @Inject constructor(
 
     suspend fun rsvpToEvent(eventId: String, userId: String) {
         remote.rsvpToEvent(eventId, userId)
+    }
+
+    suspend fun cancelRsvp(eventId: String, userId: String) {
+        remote.cancelRsvp(eventId, userId)
+    }
+
+    suspend fun getEventsByCreator(userId: String): List<Event> {
+        return remote.getEventsByCreator(userId)
+    }
+
+    suspend fun getJoinedEvents(userId: String): List<Event> {
+        return remote.getJoinedEvents(userId)
     }
 }

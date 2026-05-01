@@ -5,7 +5,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ChevronRight
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -24,9 +24,9 @@ import com.google.maps.android.heatmaps.HeatmapTileProvider
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    onEventClick: (String) -> Unit = {},
-    onCreateClick: () -> Unit = {},
-    onProfileClick: () -> Unit = {},
+    onEventDetail: (String) -> Unit = {},
+    onCreateEvent: () -> Unit = {},
+    onProfile: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -38,6 +38,18 @@ fun HomeScreen(
         uiState.searchQuery.isNotEmpty() ||
         uiState.selectedCategory != "All"
     ) uiState.filteredEvents else uiState.nearbyEvents
+
+    // Prepare heatmap data outside of GoogleMap to avoid @GoogleMapComposable scope issues
+    val heatmapData = remember(displayEvents) {
+        displayEvents.map { LatLng(it.lat, it.lng) }
+    }
+    val heatmapTileProvider = remember(heatmapData) {
+        if (heatmapData.isNotEmpty()) {
+            HeatmapTileProvider.Builder()
+                .data(heatmapData)
+                .build()
+        } else null
+    }
 
     val userLocation = uiState.userLocation ?: LatLng(20.5937, 78.9629)
     val cameraPositionState = rememberCameraPositionState {
@@ -67,7 +79,7 @@ fun HomeScreen(
                 )
                 NavigationBarItem(
                     selected = false,
-                    onClick = onCreateClick,
+                    onClick = onCreateEvent,
                     icon = {
                         Icon(Icons.Default.Add, null,
                             tint = MaterialTheme.colorScheme.primary)
@@ -82,7 +94,7 @@ fun HomeScreen(
                 )
                 NavigationBarItem(
                     selected = false,
-                    onClick = onProfileClick,
+                    onClick = onProfile,
                     icon = { Icon(Icons.Default.Person, null) },
                     label = { Text("Profile") }
                 )
@@ -94,18 +106,24 @@ fun HomeScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            // Search bar
+            // Updated SearchBar to new Material 3 API
             SearchBar(
-                query = uiState.searchQuery,
-                onQueryChange = viewModel::onSearchQueryChange,
-                onSearch = {},
-                active = false,
-                onActiveChange = {},
+                inputField = {
+                    SearchBarDefaults.InputField(
+                        query = uiState.searchQuery,
+                        onQueryChange = viewModel::onSearchQueryChange,
+                        onSearch = {},
+                        expanded = false,
+                        onExpandedChange = {},
+                        placeholder = { Text("Search events near you...") },
+                        leadingIcon = { Icon(Icons.Default.Search, null) }
+                    )
+                },
+                expanded = false,
+                onExpandedChange = {},
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                placeholder = { Text("Search events near you...") },
-                leadingIcon = { Icon(Icons.Default.Search, null) }
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
             ) {}
 
             // Category filter chips
@@ -124,34 +142,22 @@ fun HomeScreen(
             Spacer(Modifier.height(8.dp))
 
             if (showMap) {
-                // Map view
                 Box(modifier = Modifier.fillMaxSize()) {
                     GoogleMap(
                         modifier = Modifier.fillMaxSize(),
                         cameraPositionState = cameraPositionState,
                         uiSettings = MapUiSettings(zoomControlsEnabled = true)
                     ) {
-                        if (showHeatmap && displayEvents.isNotEmpty()) {
-                            val heatmapData = displayEvents.map {
-                                LatLng(it.lat, it.lng)
-                            }
-                            val provider = HeatmapTileProvider.Builder()
-                                .data(heatmapData)
-                                .build()
-                            TileOverlay(
-                                tileProvider = provider,
-                                state = rememberTileOverlayState()
-                            )
+                        if (showHeatmap && heatmapTileProvider != null) {
+                            TileOverlay(tileProvider = heatmapTileProvider)
                         } else {
                             displayEvents.forEach { event ->
                                 Marker(
-                                    state = MarkerState(
-                                        position = LatLng(event.lat, event.lng)
-                                    ),
+                                    state = MarkerState(position = LatLng(event.lat, event.lng)),
                                     title = event.title,
                                     snippet = "${event.category} • ${event.attendees.size} going",
                                     onClick = {
-                                        onEventClick(event.id)
+                                        onEventDetail(event.id)
                                         true
                                     }
                                 )
@@ -159,13 +165,12 @@ fun HomeScreen(
                         }
                     }
 
-                    // Heatmap toggle button
                     FloatingActionButton(
                         onClick = { showHeatmap = !showHeatmap },
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
                             .padding(16.dp)
-                            .padding(bottom = 16.dp), // Adjusted padding to not overlap with nav bar
+                            .padding(bottom = 16.dp),
                         containerColor = MaterialTheme.colorScheme.secondaryContainer
                     ) {
                         Icon(
@@ -175,18 +180,14 @@ fun HomeScreen(
                     }
 
                     if (uiState.isLoading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.align(Alignment.Center)
-                        )
+                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                     }
                 }
             } else {
-                // List view
                 LazyColumn(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // Recommended section (AI)
                     if (uiState.recommendedEvents.isNotEmpty() && uiState.searchQuery.isEmpty() && uiState.selectedCategory == "All") {
                         item {
                             Text(
@@ -199,11 +200,11 @@ fun HomeScreen(
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 items(uiState.recommendedEvents) { event ->
-                                    RecommendationCard(event = event, onClick = { onEventClick(event.id) })
+                                    RecommendationCard(event = event, onClick = { onEventDetail(event.id) })
                                 }
                             }
                             Spacer(Modifier.height(16.dp))
-                            Divider()
+                            HorizontalDivider()
                             Spacer(Modifier.height(8.dp))
                         }
                     }
@@ -222,20 +223,13 @@ fun HomeScreen(
                                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                     Spacer(Modifier.height(8.dp))
-                                    Text(
-                                        "No events nearby",
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
+                                    Text("No events nearby", color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                             }
                         }
                     } else {
                         items(displayEvents, key = { it.id }) { event ->
-                            EventCard(
-                                event = event,
-                                onClick = { onEventClick(event.id) }
-                            )
+                            EventCard(event = event, onClick = { onEventDetail(event.id) })
                         }
                     }
                 }
@@ -246,45 +240,23 @@ fun HomeScreen(
 
 @Composable
 fun RecommendationCard(event: Event, onClick: () -> Unit) {
-    Card(
-        onClick = onClick,
-        modifier = Modifier.width(200.dp)
-    ) {
+    Card(onClick = onClick, modifier = Modifier.width(200.dp)) {
         Column(modifier = Modifier.padding(12.dp)) {
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(80.dp)
-                    .padding(bottom = 8.dp),
+                modifier = Modifier.fillMaxWidth().height(80.dp).padding(bottom = 8.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    Icons.Default.AutoAwesome,
-                    contentDescription = null,
-                    modifier = Modifier.size(32.dp),
-                    tint = MaterialTheme.colorScheme.primary
-                )
+                Icon(Icons.Default.AutoAwesome, null, modifier = Modifier.size(32.dp), tint = MaterialTheme.colorScheme.primary)
             }
-            Text(
-                event.title,
-                style = MaterialTheme.typography.titleSmall,
-                maxLines = 1
-            )
-            Text(
-                event.category,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.primary
-            )
+            Text(event.title, style = MaterialTheme.typography.titleSmall, maxLines = 1)
+            Text(event.category, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
         }
     }
 }
 
 @Composable
 fun EventCard(event: Event, onClick: () -> Unit) {
-    Card(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth()
-    ) {
+    Card(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.padding(12.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -300,30 +272,14 @@ fun EventCard(event: Event, onClick: () -> Unit) {
                 }
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        Icons.Default.Event,
-                        null,
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
+                    Icon(Icons.Default.Event, null, tint = MaterialTheme.colorScheme.onPrimaryContainer)
                 }
             }
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = event.title,
-                    style = MaterialTheme.typography.titleSmall,
-                    maxLines = 1
-                )
-                Text(
-                    text = "${event.category} • ${event.attendees.size} going",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Text(event.title, style = MaterialTheme.typography.titleSmall, maxLines = 1)
+                Text("${event.category} • ${event.attendees.size} going", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            Icon(
-                Icons.AutoMirrored.Filled.ChevronRight,
-                null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }

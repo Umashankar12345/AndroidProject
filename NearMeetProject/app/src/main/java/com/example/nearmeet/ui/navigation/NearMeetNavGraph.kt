@@ -11,6 +11,7 @@ import com.example.nearmeet.ui.auth.LoginScreen
 import com.example.nearmeet.ui.createevent.CreateEventScreen
 import com.example.nearmeet.ui.eventdetail.EventDetailScreen
 import com.example.nearmeet.ui.home.HomeScreen
+import com.example.nearmeet.ui.profile.ProfileScreen
 import com.google.firebase.auth.FirebaseAuth
 
 sealed class Screen(val route: String) {
@@ -47,7 +48,7 @@ fun NearMeetNavGraph(
             HomeScreen(
                 onCreateEvent = { navController.navigate(Screen.CreateEvent.route) },
                 onEventDetail = { eventId -> navController.navigate(Screen.EventDetail.createRoute(eventId)) },
-                onProfile = { /* Navigate to profile */ }
+                onProfile = { navController.navigate(Screen.Profile.route) }
             )
         }
         composable(Screen.CreateEvent.route) {
@@ -62,6 +63,19 @@ fun NearMeetNavGraph(
         ) {
             EventDetailScreen(
                 onBack = { navController.popBackStack() }
+            )
+        }
+        composable(Screen.Profile.route) {
+            ProfileScreen(
+                onBack = { navController.popBackStack() },
+                onLogout = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                },
+                onEventClick = { eventId ->
+                    navController.navigate(Screen.EventDetail.createRoute(eventId))
+                }
             )
         }
     }

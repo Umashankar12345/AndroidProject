@@ -4,7 +4,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.nearmeet.data.model.Event
-import com.example.nearmeet.data.repository.AuthRepository
 import com.example.nearmeet.data.repository.EventRepository
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -37,26 +36,38 @@ class EventDetailViewModel @Inject constructor(
         loadEvent()
     }
 
-    private fun loadEvent() {
+    fun loadEvent() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
-            val event = repository.getEventById(eventId)
-            val userId = auth.currentUser?.uid
-            val isRsvped = event?.attendees?.contains(userId) ?: false
-            _uiState.value = _uiState.value.copy(
-                event = event,
-                isLoading = false,
-                isRsvped = isRsvped
-            )
+            try {
+                val event = repository.getEventById(eventId)
+                val userId = auth.currentUser?.uid
+                val isRsvped = event?.attendees?.contains(userId) ?: false
+                _uiState.value = _uiState.value.copy(
+                    event = event,
+                    isLoading = false,
+                    isRsvped = isRsvped
+                )
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(isLoading = false, error = e.message)
+            }
         }
     }
 
-    fun rsvp() {
+    fun toggleRsvp() {
         val userId = auth.currentUser?.uid ?: return
         viewModelScope.launch {
-            repository.rsvpToEvent(eventId, userId)
-            _uiState.value = _uiState.value.copy(isRsvped = true)
-            loadEvent() // Refresh data
+            try {
+                if (_uiState.value.isRsvped) {
+                    repository.cancelRsvp(eventId, userId)
+                } else {
+                    repository.rsvpToEvent(eventId, userId)
+                    // Schedule notification logic would go here
+                }
+                loadEvent() // Refresh data
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(error = e.message)
+            }
         }
     }
 }

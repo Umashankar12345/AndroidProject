@@ -41,4 +41,25 @@ class FirestoreDataSource @Inject constructor(
             .update("attendees", FieldValue.arrayUnion(userId))
             .await()
     }
+
+    suspend fun cancelRsvp(eventId: String, userId: String) {
+        firestore.collection("events")
+            .document(eventId)
+            .update("attendees", FieldValue.arrayRemove(userId))
+            .await()
+    }
+
+    suspend fun getEventsByCreator(userId: String): List<Event> {
+        return firestore.collection("events")
+            .whereEqualTo("creatorId", userId)
+            .get().await()
+            .toObjects(Event::class.java)
+    }
+
+    suspend fun getJoinedEvents(userId: String): List<Event> {
+        return firestore.collection("events")
+            .whereArrayContains("attendees", userId)
+            .get().await()
+            .toObjects(Event::class.java)
+    }
 }

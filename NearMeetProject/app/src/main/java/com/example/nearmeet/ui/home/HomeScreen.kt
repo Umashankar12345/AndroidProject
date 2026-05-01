@@ -1,5 +1,6 @@
 package com.example.nearmeet.ui.home
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -23,12 +24,25 @@ import com.google.maps.android.compose.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
+    onCreateEvent: () -> Unit,
+    onEventDetail: (String) -> Unit,
+    onProfile: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showMap by remember { mutableStateOf(true) }
 
+    // Initial load - India center
+    LaunchedEffect(Unit) {
+        viewModel.loadNearbyEvents(20.5937, 78.9629)
+    }
+
     Scaffold(
+        floatingActionButton = {
+            FloatingActionButton(onClick = onCreateEvent) {
+                Icon(Icons.Default.Add, contentDescription = "Add Event")
+            }
+        },
         bottomBar = {
             NavigationBar {
                 NavigationBarItem(
@@ -45,19 +59,7 @@ fun HomeScreen(
                 )
                 NavigationBarItem(
                     selected = false,
-                    onClick = {},
-                    icon = { Icon(Icons.Default.Add, null) },
-                    label = { Text("Create") }
-                )
-                NavigationBarItem(
-                    selected = false,
-                    onClick = {},
-                    icon = { Icon(Icons.Default.Notifications, null) },
-                    label = { Text("Alerts") }
-                )
-                NavigationBarItem(
-                    selected = false,
-                    onClick = {},
+                    onClick = onProfile,
                     icon = { Icon(Icons.Default.Person, null) },
                     label = { Text("Profile") }
                 )
@@ -70,9 +72,9 @@ fun HomeScreen(
                 .padding(padding)
         ) {
             if (showMap) {
-                NearMeetMap(uiState.nearbyEvents)
+                NearMeetMap(uiState.nearbyEvents, onEventDetail)
             } else {
-                EventsList(uiState)
+                EventsList(uiState, onEventDetail)
             }
             
             if (uiState.isLoading) {
@@ -85,29 +87,32 @@ fun HomeScreen(
 }
 
 @Composable
-fun NearMeetMap(events: List<com.example.nearmeet.data.model.Event>) {
-    val initialPos = LatLng(20.5937, 78.9629) // Default India center
+fun NearMeetMap(
+    events: List<com.example.nearmeet.data.model.Event>,
+    onMarkerClick: (String) -> Unit
+) {
+    val initialPos = LatLng(20.5937, 78.9629)
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(initialPos, 5f)
     }
 
     GoogleMap(
         modifier = Modifier.fillMaxSize(),
-        cameraPositionState = cameraPositionState,
-        properties = MapProperties(isMyLocationEnabled = false)
+        cameraPositionState = cameraPositionState
     ) {
         events.forEach { event ->
             Marker(
                 state = MarkerState(position = LatLng(event.lat, event.lng)),
                 title = event.title,
-                snippet = event.category
+                snippet = "Tap for details",
+                onInfoWindowClick = { onMarkerClick(event.id) }
             )
         }
     }
 }
 
 @Composable
-fun EventsList(uiState: HomeUiState) {
+fun EventsList(uiState: HomeUiState, onEventDetail: (String) -> Unit) {
     if (uiState.nearbyEvents.isEmpty()) {
         Box(Modifier.fillMaxSize()) {
             Text(
@@ -123,16 +128,18 @@ fun EventsList(uiState: HomeUiState) {
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(uiState.nearbyEvents) { event ->
-                EventListCard(event = event)
+                EventListCard(event = event, onClick = { onEventDetail(event.id) })
             }
         }
     }
 }
 
 @Composable
-fun EventListCard(event: com.example.nearmeet.data.model.Event) {
+fun EventListCard(event: com.example.nearmeet.data.model.Event, onClick: () -> Unit) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
         shape = MaterialTheme.shapes.medium
     ) {
         Column(modifier = Modifier.padding(16.dp)) {

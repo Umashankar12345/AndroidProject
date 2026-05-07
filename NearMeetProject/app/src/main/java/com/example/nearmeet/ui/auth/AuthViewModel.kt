@@ -21,14 +21,22 @@ class AuthViewModel @Inject constructor(
     val error: StateFlow<String?> = _error
 
     fun login(email: String, pass: String) {
-        authRepository.loginWithEmail(email, pass) { success, msg ->
+        if (email.isBlank() || pass.isBlank()) {
+            _error.value = "Email and password cannot be empty"
+            return
+        }
+        authRepository.loginWithEmail(email.trim(), pass.trim()) { success, msg ->
             if (success) _isLoggedIn.value = true
             else _error.value = msg
         }
     }
 
     fun signUp(email: String, pass: String) {
-        authRepository.signUpWithEmail(email, pass) { success, msg ->
+        if (email.isBlank() || pass.isBlank()) {
+            _error.value = "Email and password cannot be empty"
+            return
+        }
+        authRepository.signUpWithEmail(email.trim(), pass.trim()) { success, msg ->
             if (success) _isLoggedIn.value = true
             else _error.value = msg
         }

@@ -63,6 +63,7 @@ fun HomeScreen(
     }
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.surface,
         bottomBar = {
             NavigationBar {
                 NavigationBarItem(

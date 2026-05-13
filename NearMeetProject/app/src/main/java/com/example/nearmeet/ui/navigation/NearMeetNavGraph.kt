@@ -13,6 +13,7 @@ import com.example.nearmeet.ui.createevent.CreateEventScreen
 import com.example.nearmeet.ui.eventdetail.EventDetailScreen
 import com.example.nearmeet.ui.home.HomeScreen
 import com.example.nearmeet.ui.profile.ProfileScreen
+import com.example.nearmeet.ui.showcase.ShowcaseScreen
 import com.google.firebase.auth.FirebaseAuth
 
 sealed class Screen(val route: String) {
@@ -24,6 +25,7 @@ sealed class Screen(val route: String) {
     object Profile : Screen("profile")
     object Login : Screen("login")
     object Alerts : Screen("alerts")
+    object Showcase : Screen("showcase")
 }
 
 @Composable
@@ -78,6 +80,9 @@ fun NearMeetNavGraph(
                 },
                 onEventClick = { eventId ->
                     navController.navigate(Screen.EventDetail.createRoute(eventId))
+                },
+                onShowcaseClick = {
+                    navController.navigate(Screen.Showcase.route)
                 }
             )
         }
@@ -87,6 +92,11 @@ fun NearMeetNavGraph(
                 onEventClick = { eventId ->
                     navController.navigate(Screen.EventDetail.createRoute(eventId))
                 }
+            )
+        }
+        composable(Screen.Showcase.route) {
+            ShowcaseScreen(
+                onBack = { navController.popBackStack() }
             )
         }
     }

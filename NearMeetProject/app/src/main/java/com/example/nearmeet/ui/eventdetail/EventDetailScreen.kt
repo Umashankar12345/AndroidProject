@@ -65,8 +65,9 @@ fun EventDetailScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Column {
+                            val count = uiState.event?.attendees?.size ?: 0
                             Text(
-                                text = "${uiState.event?.attendees?.size ?: 0} attending",
+                                text = "$count attending",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
@@ -228,9 +229,11 @@ fun EventDetailScreen(
                         Spacer(modifier = Modifier.width(16.dp))
                         Column {
                             Text(text = "Near the pin location", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
-                            // Fixed: Removed incorrect escaping of nested quotes in string template
+                            
+                            val latStr = String.format(Locale.getDefault(), "%.4f", event.lat)
+                            val lngStr = String.format(Locale.getDefault(), "%.4f", event.lng)
                             Text(
-                                text = "(${String.format(Locale.getDefault(), "%.4f", event.lat)}, ${String.format(Locale.getDefault(), "%.4f", event.lng)})", 
+                                text = "($latStr, $lngStr)", 
                                 style = MaterialTheme.typography.bodySmall, 
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )

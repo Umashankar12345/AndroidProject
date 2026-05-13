@@ -3,6 +3,7 @@ package com.example.nearmeet.data.repository
 import com.example.nearmeet.data.local.EventDao
 import com.example.nearmeet.data.local.EventEntity
 import com.example.nearmeet.data.model.Event
+import com.example.nearmeet.data.model.User
 import com.example.nearmeet.data.remote.FirestoreDataSource
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -60,5 +61,9 @@ class EventRepository @Inject constructor(
 
     suspend fun getJoinedEvents(userId: String): List<Event> {
         return remote.getJoinedEvents(userId)
+    }
+
+    suspend fun getUserById(userId: String): User? {
+        return remote.getUserById(userId)
     }
 }

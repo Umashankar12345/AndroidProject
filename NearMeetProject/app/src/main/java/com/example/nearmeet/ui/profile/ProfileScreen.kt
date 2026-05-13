@@ -9,6 +9,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Stars
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -29,6 +30,7 @@ fun ProfileScreen(
     onBack: () -> Unit,
     onLogout: () -> Unit,
     onEventClick: (String) -> Unit,
+    onShowcaseClick: () -> Unit,
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -118,10 +120,22 @@ fun ProfileScreen(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         
-                        Spacer(Modifier.height(8.dp))
+                        Spacer(Modifier.height(16.dp))
+                        
+                        // New Showcase Button
+                        OutlinedButton(
+                            onClick = onShowcaseClick,
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp)
+                        ) {
+                            Icon(Icons.Default.Stars, contentDescription = null)
+                            Spacer(Modifier.width(8.dp))
+                            Text("View App Features")
+                        }
+
+                        Spacer(Modifier.height(16.dp))
                         
                         Row(
-                            modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
                             horizontalArrangement = Arrangement.SpaceEvenly
                         ) {
                             StatItem(label = "Created", count = uiState.createdEvents.size)
@@ -178,10 +192,6 @@ fun ProfileScreen(
                             }
                         }
                     }
-                }
-                
-                item {
-                    Spacer(modifier = Modifier.height(32.dp))
                 }
             }
         }

@@ -228,6 +228,7 @@ fun EventDetailScreen(
                         Spacer(modifier = Modifier.width(16.dp))
                         Column {
                             Text(text = "Near the pin location", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
+                            
                             val latStr = String.format(Locale.getDefault(), "%.4f", event.lat)
                             val lngStr = String.format(Locale.getDefault(), "%.4f", event.lng)
                             Text(

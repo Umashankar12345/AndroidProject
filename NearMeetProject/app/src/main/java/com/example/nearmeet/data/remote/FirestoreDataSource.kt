@@ -1,6 +1,7 @@
 package com.example.nearmeet.data.remote
 
 import com.example.nearmeet.data.model.Event
+import com.example.nearmeet.data.model.User
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
@@ -61,5 +62,12 @@ class FirestoreDataSource @Inject constructor(
             .whereArrayContains("attendees", userId)
             .get().await()
             .toObjects(Event::class.java)
+    }
+
+    suspend fun getUserById(userId: String): User? {
+        return firestore.collection("users")
+            .document(userId)
+            .get().await()
+            .toObject(User::class.java)
     }
 }

@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.nearmeet.ui.alerts.AlertsScreen
 import com.example.nearmeet.ui.auth.LoginScreen
 import com.example.nearmeet.ui.createevent.CreateEventScreen
 import com.example.nearmeet.ui.eventdetail.EventDetailScreen
@@ -22,6 +23,7 @@ sealed class Screen(val route: String) {
     }
     object Profile : Screen("profile")
     object Login : Screen("login")
+    object Alerts : Screen("alerts")
 }
 
 @Composable
@@ -48,7 +50,8 @@ fun NearMeetNavGraph(
             HomeScreen(
                 onCreateEvent = { navController.navigate(Screen.CreateEvent.route) },
                 onEventDetail = { eventId -> navController.navigate(Screen.EventDetail.createRoute(eventId)) },
-                onProfile = { navController.navigate(Screen.Profile.route) }
+                onProfile = { navController.navigate(Screen.Profile.route) },
+                onAlerts = { navController.navigate(Screen.Alerts.route) }
             )
         }
         composable(Screen.CreateEvent.route) {
@@ -73,6 +76,14 @@ fun NearMeetNavGraph(
                         popUpTo(0) { inclusive = true }
                     }
                 },
+                onEventClick = { eventId ->
+                    navController.navigate(Screen.EventDetail.createRoute(eventId))
+                }
+            )
+        }
+        composable(Screen.Alerts.route) {
+            AlertsScreen(
+                onBack = { navController.popBackStack() },
                 onEventClick = { eventId ->
                     navController.navigate(Screen.EventDetail.createRoute(eventId))
                 }

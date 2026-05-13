@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.nearmeet.data.model.Event
+import com.example.nearmeet.ui.alerts.AlertsViewModel
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.*
@@ -27,9 +28,13 @@ fun HomeScreen(
     onEventDetail: (String) -> Unit = {},
     onCreateEvent: () -> Unit = {},
     onProfile: () -> Unit = {},
-    viewModel: HomeViewModel = hiltViewModel()
+    onAlerts: () -> Unit = {},
+    viewModel: HomeViewModel = hiltViewModel(),
+    alertsViewModel: AlertsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val alertsState by alertsViewModel.uiState.collectAsStateWithLifecycle()
+    
     var showMap by remember { mutableStateOf(true) }
     var showHeatmap by remember { mutableStateOf(false) }
     val categories = listOf("All", "Music", "Sports", "Food", "Art", "Tech", "Social")
@@ -89,8 +94,20 @@ fun HomeScreen(
                 )
                 NavigationBarItem(
                     selected = false,
-                    onClick = {},
-                    icon = { Icon(Icons.Default.Notifications, null) },
+                    onClick = onAlerts,
+                    icon = {
+                        BadgedBox(
+                            badge = {
+                                if (alertsState.unreadCount > 0) {
+                                    Badge {
+                                        Text(alertsState.unreadCount.toString())
+                                    }
+                                }
+                            }
+                        ) {
+                            Icon(Icons.Default.Notifications, null)
+                        }
+                    },
                     label = { Text("Alerts") }
                 )
                 NavigationBarItem(

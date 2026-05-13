@@ -14,7 +14,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -117,10 +116,10 @@ fun EventDetailScreen(
                             zoomControlsEnabled = false,
                             scrollGesturesEnabled = false,
                             tiltGesturesEnabled = false,
-                            rotateGesturesEnabled = false
+                            rotationGesturesEnabled = false
                         )
                     ) {
-                        Marker(state = MarkerState(position = location))
+                        Marker(state = rememberMarkerState(position = location))
                     }
                 }
 
@@ -229,7 +228,13 @@ fun EventDetailScreen(
                         Spacer(modifier = Modifier.width(16.dp))
                         Column {
                             Text(text = "Near the pin location", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
-                            Text(text = "(${String.format("%.4f", event.lat)}, ${String.format("%.4f", event.lng)})", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            val latStr = String.format(Locale.getDefault(), "%.4f", event.lat)
+                            val lngStr = String.format(Locale.getDefault(), "%.4f", event.lng)
+                            Text(
+                                text = "($latStr, $lngStr)", 
+                                style = MaterialTheme.typography.bodySmall, 
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
                     }
 

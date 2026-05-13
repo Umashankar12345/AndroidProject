@@ -2,16 +2,19 @@ package com.example.nearmeet.ui.eventdetail
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -42,8 +45,48 @@ fun EventDetailScreen(
                             contentDescription = "Back"
                         )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface,
+                )
             )
+        },
+        bottomBar = {
+            if (uiState.event != null) {
+                Surface(
+                    tonalElevation = 8.dp,
+                    shadowElevation = 8.dp
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column {
+                            Text(
+                                text = "${uiState.event?.attendees?.size ?: 0} attending",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = "Be part of it!",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Button(
+                            onClick = { viewModel.toggleRsvp() },
+                            shape = MaterialTheme.shapes.medium,
+                            modifier = Modifier.width(140.dp)
+                        ) {
+                            Text(if (uiState.isRsvped) "Joined" else "RSVP")
+                        }
+                    }
+                }
+            }
         }
     ) { padding ->
         if (uiState.isLoading) {
@@ -57,8 +100,12 @@ fun EventDetailScreen(
                     .padding(padding)
                     .verticalScroll(rememberScrollState())
             ) {
-                // Map Header
-                Box(modifier = Modifier.height(250.dp).fillMaxWidth()) {
+                // Mini-Map Header
+                Box(
+                    modifier = Modifier
+                        .height(200.dp)
+                        .fillMaxWidth()
+                ) {
                     val location = LatLng(event.lat, event.lng)
                     val cameraPositionState = rememberCameraPositionState {
                         position = CameraPosition.fromLatLngZoom(location, 15f)
@@ -66,73 +113,142 @@ fun EventDetailScreen(
                     GoogleMap(
                         modifier = Modifier.fillMaxSize(),
                         cameraPositionState = cameraPositionState,
-                        uiSettings = MapUiSettings(zoomControlsEnabled = false, scrollGesturesEnabled = false)
+                        uiSettings = MapUiSettings(
+                            zoomControlsEnabled = false,
+                            scrollGesturesEnabled = false,
+                            tiltGesturesEnabled = false,
+                            rotateGesturesEnabled = false
+                        )
                     ) {
                         Marker(state = MarkerState(position = location))
                     }
                 }
 
-                Column(modifier = Modifier.padding(16.dp)) {
+                Column(modifier = Modifier.padding(20.dp)) {
+                    // Event Header
                     Text(
                         text = event.title,
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        lineHeight = 32.sp
                     )
                     
-                    Surface(
-                        color = MaterialTheme.colorScheme.primaryContainer,
-                        shape = MaterialTheme.shapes.small,
-                        modifier = Modifier.padding(vertical = 8.dp)
+                    Row(
+                        modifier = Modifier.padding(vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = event.category,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                            style = MaterialTheme.typography.labelMedium
+                        SuggestionChip(
+                            onClick = { },
+                            label = { Text(event.category) },
+                            enabled = false,
+                            colors = SuggestionChipDefaults.suggestionChipColors(
+                                labelColor = MaterialTheme.colorScheme.primary
+                            )
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.DateRange, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        val date = SimpleDateFormat("EEE, MMM d, yyyy • h:mm a", Locale.getDefault()).format(Date(event.dateTime))
-                        Text(text = date)
+                    // Organiser Info
+                    Row(
+                        modifier = Modifier.padding(vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Surface(
+                            modifier = Modifier.size(48.dp),
+                            shape = CircleShape,
+                            color = MaterialTheme.colorScheme.primaryContainer
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    Icons.Default.Person,
+                                    null,
+                                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column {
+                            Text(
+                                text = uiState.organizer?.name ?: "Unknown Organiser",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = "Organiser",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.LocationOn, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = "Location coordinates: ${event.lat}, ${event.lng}")
+                    // Date and Location Details
+                    Row(
+                        modifier = Modifier.padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Surface(
+                            modifier = Modifier.size(40.dp),
+                            shape = MaterialTheme.shapes.small,
+                            color = MaterialTheme.colorScheme.secondaryContainer
+                        ) {
+                            Icon(
+                                Icons.Default.CalendarMonth,
+                                null,
+                                modifier = Modifier.padding(8.dp),
+                                tint = MaterialTheme.colorScheme.onSecondaryContainer
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(16.dp))
+                        val date = SimpleDateFormat("EEEE, d MMMM yyyy", Locale.getDefault()).format(Date(event.dateTime))
+                        val time = SimpleDateFormat("h:mm a", Locale.getDefault()).format(Date(event.dateTime))
+                        Column {
+                            Text(text = date, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
+                            Text(text = time, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
+
+                    Row(
+                        modifier = Modifier.padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Surface(
+                            modifier = Modifier.size(40.dp),
+                            shape = MaterialTheme.shapes.small,
+                            color = MaterialTheme.colorScheme.secondaryContainer
+                        ) {
+                            Icon(
+                                Icons.Default.LocationOn,
+                                null,
+                                modifier = Modifier.padding(8.dp),
+                                tint = MaterialTheme.colorScheme.onSecondaryContainer
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column {
+                            Text(text = "Near the pin location", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
+                            Text(text = "(${String.format("%.4f", event.lat)}, ${String.format("%.4f", event.lng)})", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    Text(text = "About this event", style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        text = "About this event",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = event.description,
                         style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(vertical = 8.dp)
+                        lineHeight = 24.sp,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
 
-                    Spacer(modifier = Modifier.height(24.dp))
-                    
-                    Text(
-                        text = "${event.attendees.size} people are going",
-                        fontWeight = FontWeight.SemiBold
-                    )
-
-                    Spacer(modifier = Modifier.height(32.dp))
-
-                    Button(
-                        onClick = { viewModel.toggleRsvp() },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = MaterialTheme.shapes.medium
-                    ) {
-                        Text(if (uiState.isRsvped) "Cancel RSVP" else "RSVP Now")
-                    }
+                    Spacer(modifier = Modifier.height(40.dp))
                 }
             }
         } else if (uiState.error != null) {

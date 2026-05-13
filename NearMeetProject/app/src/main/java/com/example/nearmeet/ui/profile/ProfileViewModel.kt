@@ -3,7 +3,7 @@ package com.example.nearmeet.ui.profile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.nearmeet.data.model.Event
-import com.example.nearmeet.data.repository.AuthRepository
+import com.example.nearmeet.data.model.User
 import com.example.nearmeet.data.repository.EventRepository
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,11 +14,11 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class ProfileUiState(
-    val userName: String = "",
-    val email: String = "",
+    val user: User? = null,
     val createdEvents: List<Event> = emptyList(),
     val joinedEvents: List<Event> = emptyList(),
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    val error: String? = null
 )
 
 @HiltViewModel
@@ -35,24 +35,31 @@ class ProfileViewModel @Inject constructor(
     }
 
     private fun loadProfileData() {
-        val user = auth.currentUser ?: return
+        val firebaseUser = auth.currentUser ?: return
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(
-                userName = user.displayName ?: "User",
-                email = user.email ?: "Anonymous",
-                isLoading = true
-            )
+            _uiState.value = _uiState.value.copy(isLoading = true)
             
             try {
-                val created = repository.getEventsByCreator(user.uid)
-                val joined = repository.getJoinedEvents(user.uid)
+                val userData = repository.getUserById(firebaseUser.uid) ?: User(
+                    uid = firebaseUser.uid,
+                    name = firebaseUser.displayName ?: "User",
+                    email = firebaseUser.email ?: ""
+                )
+                
+                val created = repository.getEventsByCreator(firebaseUser.uid)
+                val joined = repository.getJoinedEvents(firebaseUser.uid)
+                
                 _uiState.value = _uiState.value.copy(
+                    user = userData,
                     createdEvents = created,
                     joinedEvents = joined,
                     isLoading = false
                 )
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(isLoading = false)
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false, 
+                    error = e.message
+                )
             }
         }
     }

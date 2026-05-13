@@ -1,9 +1,14 @@
 package com.example.nearmeet.data.remote
 
 import com.example.nearmeet.data.model.Event
+import com.example.nearmeet.data.model.Notification
 import com.example.nearmeet.data.model.User
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
@@ -69,5 +74,41 @@ class FirestoreDataSource @Inject constructor(
             .document(userId)
             .get().await()
             .toObject(User::class.java)
+    }
+
+    fun getNotifications(userId: String): Flow<List<Notification>> = callbackFlow {
+        val subscription = firestore.collection("notifications")
+            .whereEqualTo("userId", userId)
+            .orderBy("timestamp", Query.Direction.DESCENDING)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    close(error)
+                    return@addSnapshotListener
+                }
+                if (snapshot != null) {
+                    trySend(snapshot.toObjects(Notification::class.java))
+                }
+            }
+        awaitClose { subscription.remove() }
+    }
+
+    suspend fun markNotificationAsRead(notificationId: String) {
+        firestore.collection("notifications")
+            .document(notificationId)
+            .update("isRead", true)
+            .await()
+    }
+
+    suspend fun markAllNotificationsAsRead(userId: String) {
+        val batch = firestore.batch()
+        val unreadNotifications = firestore.collection("notifications")
+            .whereEqualTo("userId", userId)
+            .whereEqualTo("isRead", false)
+            .get().await()
+
+        for (doc in unreadNotifications) {
+            batch.update(doc.reference, "isRead", true)
+        }
+        batch.commit().await()
     }
 }

@@ -1,9 +1,14 @@
 package com.example.nearmeet.ui.home
 
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.List
@@ -12,6 +17,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -19,8 +26,58 @@ import com.example.nearmeet.data.model.Event
 import com.example.nearmeet.ui.alerts.AlertsViewModel
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.maps.android.compose.*
 import com.google.maps.android.heatmaps.HeatmapTileProvider
+
+private const val MAP_STYLE_JSON = """
+[
+  {
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#f5f5f5"
+      }
+    ]
+  },
+  {
+    "featureType": "poi",
+    "elementType": "labels.text",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "road",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#ffffff"
+      }
+    ]
+  },
+  {
+    "featureType": "water",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#e9e9e9"
+      }
+    ]
+  },
+  {
+    "featureType": "water",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#9e9e9e"
+      }
+    ]
+  }
+]
+"""
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,7 +101,6 @@ fun HomeScreen(
         uiState.selectedCategory != "All"
     ) uiState.filteredEvents else uiState.nearbyEvents
 
-    // Prepare heatmap data outside of GoogleMap to avoid @GoogleMapComposable scope issues
     val heatmapData = remember(displayEvents) {
         displayEvents.map { LatLng(it.lat, it.lng) }
     }
@@ -68,7 +124,7 @@ fun HomeScreen(
     }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = MaterialTheme.colorScheme.surface,
         bottomBar = {
             NavigationBar {
                 NavigationBarItem(
@@ -124,7 +180,7 @@ fun HomeScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            // Updated SearchBar to new Material 3 API
+            // 1. Refined Search Bar
             SearchBar(
                 inputField = {
                     SearchBarDefaults.InputField(
@@ -133,38 +189,72 @@ fun HomeScreen(
                         onSearch = {},
                         expanded = false,
                         onExpandedChange = {},
-                        placeholder = { Text("Search events near you...") },
-                        leadingIcon = { Icon(Icons.Default.Search, null) }
+                        placeholder = { 
+                            Text(
+                                "Search events near you...",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                            ) 
+                        },
+                        leadingIcon = { Icon(Icons.Default.Search, null, tint = MaterialTheme.colorScheme.primary) }
                     )
                 },
                 expanded = false,
                 onExpandedChange = {},
+                shape = CircleShape,
+                colors = SearchBarDefaults.colors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                ),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
             ) {}
 
-            // Category filter chips
+            // 2. Refined Filters with high corner radius and spacing
             LazyRow(
                 contentPadding = PaddingValues(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                modifier = Modifier.padding(bottom = 16.dp)
             ) {
                 items(categories) { category ->
+                    val isSelected = uiState.selectedCategory == category
                     FilterChip(
-                        selected = uiState.selectedCategory == category,
+                        selected = isSelected,
                         onClick = { viewModel.onCategorySelect(category) },
-                        label = { Text(category) }
+                        label = { Text(category, modifier = Modifier.padding(horizontal = 4.dp)) },
+                        shape = RoundedCornerShape(24.dp),
+                        border = if (isSelected) null else FilterChipDefaults.filterChipBorder(
+                            enabled = true,
+                            selected = false,
+                            borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                        ),
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                            selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            containerColor = Color.Transparent
+                        )
                     )
                 }
             }
-            Spacer(Modifier.height(8.dp))
+
+            // Error Message Box
+            if (uiState.error != null) {
+                ErrorAlertBox(message = uiState.error!!)
+            }
 
             if (showMap) {
                 Box(modifier = Modifier.fillMaxSize()) {
                     GoogleMap(
                         modifier = Modifier.fillMaxSize(),
                         cameraPositionState = cameraPositionState,
-                        uiSettings = MapUiSettings(zoomControlsEnabled = true)
+                        uiSettings = MapUiSettings(
+                            zoomControlsEnabled = false,
+                            myLocationButtonEnabled = true
+                        ),
+                        properties = MapProperties(
+                            isMyLocationEnabled = true,
+                            mapStyleOptions = MapStyleOptions(MAP_STYLE_JSON)
+                        )
                     ) {
                         if (showHeatmap && heatmapTileProvider != null) {
                             TileOverlay(tileProvider = heatmapTileProvider)
@@ -183,22 +273,40 @@ fun HomeScreen(
                         }
                     }
 
-                    FloatingActionButton(
+                    // 3. Refined FAB (Heatmap Toggle)
+                    LargeFloatingActionButton(
                         onClick = { showHeatmap = !showHeatmap },
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
-                            .padding(16.dp)
-                            .padding(bottom = 16.dp),
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer
+                            .padding(24.dp)
+                            .padding(bottom = 32.dp), // Higher to avoid Google logo
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        shape = RoundedCornerShape(20.dp)
                     ) {
                         Icon(
                             if (showHeatmap) Icons.Default.Map else Icons.Default.Whatshot,
-                            contentDescription = "Toggle heatmap"
+                            contentDescription = "Toggle heatmap",
+                            modifier = Modifier.size(32.dp)
                         )
                     }
 
                     if (uiState.isLoading) {
-                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.5f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                CircularProgressIndicator()
+                                Spacer(Modifier.height(16.dp))
+                                Text(
+                                    "Fetching events near you...",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
                     }
                 }
             } else {
@@ -206,6 +314,7 @@ fun HomeScreen(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
+                    // ... (List items implementation remains largely same, maybe refined)
                     if (uiState.recommendedEvents.isNotEmpty() && uiState.searchQuery.isEmpty() && uiState.selectedCategory == "All") {
                         item {
                             Text(
@@ -241,7 +350,7 @@ fun HomeScreen(
                                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                     Spacer(Modifier.height(8.dp))
-                                    Text("No events nearby", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    Text("No events found", color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                             }
                         }
@@ -257,15 +366,55 @@ fun HomeScreen(
 }
 
 @Composable
+fun ErrorAlertBox(message: String) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFFFFEBEE) // Light Pink
+        ),
+        border = BorderStroke(1.dp, Color(0xFFEF5350)), // Muted Red
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Icon(
+                Icons.Default.Error,
+                contentDescription = null,
+                tint = Color(0xFFC62828) // Dark Crimson
+            )
+            Text(
+                text = message,
+                color = Color(0xFFC62828), // Dark Crimson
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+    }
+}
+
+@Composable
 fun RecommendationCard(event: Event, onClick: () -> Unit) {
-    Card(onClick = onClick, modifier = Modifier.width(200.dp)) {
+    Card(
+        onClick = onClick, 
+        modifier = Modifier.width(200.dp),
+        shape = RoundedCornerShape(16.dp)
+    ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Box(
-                modifier = Modifier.fillMaxWidth().height(80.dp).padding(bottom = 8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(100.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(Icons.Default.AutoAwesome, null, modifier = Modifier.size(32.dp), tint = MaterialTheme.colorScheme.primary)
             }
+            Spacer(Modifier.height(8.dp))
             Text(event.title, style = MaterialTheme.typography.titleSmall, maxLines = 1)
             Text(event.category, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
         }
@@ -274,30 +423,49 @@ fun RecommendationCard(event: Event, onClick: () -> Unit) {
 
 @Composable
 fun EventCard(event: Event, onClick: () -> Unit) {
-    Card(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
+    Card(
+        onClick = onClick, 
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
         Row(
             modifier = Modifier.padding(12.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Surface(
-                modifier = Modifier.size(48.dp),
-                shape = MaterialTheme.shapes.medium,
+                modifier = Modifier.size(56.dp),
+                shape = RoundedCornerShape(12.dp),
                 color = when (event.category) {
-                    "Music" -> MaterialTheme.colorScheme.primaryContainer
-                    "Sports" -> MaterialTheme.colorScheme.secondaryContainer
-                    else -> MaterialTheme.colorScheme.tertiaryContainer
+                    "Music" -> Color(0xFFE1BEE7) // Light Purple
+                    "Sports" -> Color(0xFFBBDEFB) // Light Blue
+                    "Food" -> Color(0xFFFFE0B2) // Light Orange
+                    else -> MaterialTheme.colorScheme.surfaceVariant
                 }
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    Icon(Icons.Default.Event, null, tint = MaterialTheme.colorScheme.onPrimaryContainer)
+                    Icon(
+                        imageVector = when(event.category) {
+                            "Music" -> Icons.Default.MusicNote
+                            "Sports" -> Icons.Default.SportsBasketball
+                            "Food" -> Icons.Default.Restaurant
+                            else -> Icons.Default.Event
+                        },
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
                 }
             }
             Column(modifier = Modifier.weight(1f)) {
-                Text(event.title, style = MaterialTheme.typography.titleSmall, maxLines = 1)
-                Text("${event.category} • ${event.attendees.size} going", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(event.title, style = MaterialTheme.typography.titleMedium, maxLines = 1)
+                Text(
+                    "${event.category} • ${event.attendees.size} going", 
+                    style = MaterialTheme.typography.bodySmall, 
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
-            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = MaterialTheme.colorScheme.outline)
         }
     }
 }

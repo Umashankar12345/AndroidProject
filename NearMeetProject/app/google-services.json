@@ -12,7 +12,20 @@
           "package_name": "com.example.nearmeet"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "896864808361-nendalmrcbmdbrs73shckg7oqgmlucaq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.nearmeet",
+            "certificate_hash": "f2367a02d424bd302172d4733329253fdd8cb9aa"
+          }
+        },
+        {
+          "client_id": "896864808361-0dk2p0hadeaj0tnv0vb87s3k4pa2vgsp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyD7LuS-BwxMXdU93o5V4ySZtwSTjujCZL0"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "896864808361-0dk2p0hadeaj0tnv0vb87s3k4pa2vgsp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

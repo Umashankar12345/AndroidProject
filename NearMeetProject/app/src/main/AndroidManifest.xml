@@ -18,10 +18,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.NearMeetProject">
         
-        <!-- Google Maps API Key -->
+        <!-- Updated Google Maps API Key to match your new Firebase project -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyAuLW3I0TmwvTqdUMjXPgWz3CFUp83enRQ" />
+            android:value="AIzaSyD7LuS-BwxMXdU93o5V4ySZtwSTjujCZL0" />
 
         <activity
             android:name=".MainActivity"

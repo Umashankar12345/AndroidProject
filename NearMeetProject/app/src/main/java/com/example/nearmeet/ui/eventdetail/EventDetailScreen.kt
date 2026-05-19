@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -107,6 +108,7 @@ fun EventDetailScreen(
                         .fillMaxWidth()
                 ) {
                     val location = LatLng(event.lat, event.lng)
+                    val markerState = rememberMarkerState(position = location)
                     val cameraPositionState = rememberCameraPositionState {
                         position = CameraPosition.fromLatLngZoom(location, 15f)
                     }
@@ -120,7 +122,7 @@ fun EventDetailScreen(
                             rotationGesturesEnabled = false
                         )
                     ) {
-                        Marker(state = rememberMarkerState(position = location))
+                        Marker(state = markerState)
                     }
                 }
 
@@ -229,9 +231,8 @@ fun EventDetailScreen(
                         Spacer(modifier = Modifier.width(16.dp))
                         Column {
                             Text(text = "Near the pin location", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
-                            
-                            val latStr = String.format(Locale.getDefault(), "%.4f", event.lat)
-                            val lngStr = String.format(Locale.getDefault(), "%.4f", event.lng)
+                            val latStr = remember(event.lat) { String.format(Locale.getDefault(), "%.4f", event.lat) }
+                            val lngStr = remember(event.lng) { String.format(Locale.getDefault(), "%.4f", event.lng) }
                             Text(
                                 text = "($latStr, $lngStr)", 
                                 style = MaterialTheme.typography.bodySmall, 

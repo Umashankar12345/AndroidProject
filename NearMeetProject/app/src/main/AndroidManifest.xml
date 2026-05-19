@@ -18,10 +18,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.NearMeetProject">
         
-        <!-- Replace YOUR_API_KEY_HERE with your real Google Maps API Key -->
+        <!-- Google Maps API Key -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="YOUR_API_KEY_HERE" />
+            android:value="AIzaSyAuLW3I0TmwvTqdUMjXPgWz3CFUp83enRQ" />
 
         <activity
             android:name=".MainActivity"

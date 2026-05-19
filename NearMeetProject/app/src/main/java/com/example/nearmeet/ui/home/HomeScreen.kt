@@ -1,6 +1,5 @@
 package com.example.nearmeet.ui.home
 
-import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -18,6 +17,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -41,11 +41,71 @@ private const val MAP_STYLE_JSON = """
     ]
   },
   {
-    "featureType": "poi",
-    "elementType": "labels.text",
+    "elementType": "labels.icon",
     "stylers": [
       {
         "visibility": "off"
+      }
+    ]
+  },
+  {
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#616161"
+      }
+    ]
+  },
+  {
+    "elementType": "labels.text.stroke",
+    "stylers": [
+      {
+        "color": "#f5f5f5"
+      }
+    ]
+  },
+  {
+    "featureType": "administrative.land_parcel",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#bdbdbd"
+      }
+    ]
+  },
+  {
+    "featureType": "poi",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#eeeeee"
+      }
+    ]
+  },
+  {
+    "featureType": "poi",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#757575"
+      }
+    ]
+  },
+  {
+    "featureType": "poi.park",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#e5e5e5"
+      }
+    ]
+  },
+  {
+    "featureType": "poi.park",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#9e9e9e"
       }
     ]
   },
@@ -59,11 +119,65 @@ private const val MAP_STYLE_JSON = """
     ]
   },
   {
+    "featureType": "road.arterial",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#757575"
+      }
+    ]
+  },
+  {
+    "featureType": "road.highway",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#dadada"
+      }
+    ]
+  },
+  {
+    "featureType": "road.highway",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#616161"
+      }
+    ]
+  },
+  {
+    "featureType": "road.local",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#9e9e9e"
+      }
+    ]
+  },
+  {
+    "featureType": "transit.line",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#e5e5e5"
+      }
+    ]
+  },
+  {
+    "featureType": "transit.station",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#eeeeee"
+      }
+    ]
+  },
+  {
     "featureType": "water",
     "elementType": "geometry",
     "stylers": [
       {
-        "color": "#e9e9e9"
+        "color": "#c9c9c9"
       }
     ]
   },
@@ -124,7 +238,7 @@ fun HomeScreen(
     }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
             NavigationBar {
                 NavigationBarItem(
@@ -180,7 +294,7 @@ fun HomeScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            // 1. Refined Search Bar
+            // 1. Refined Search Bar with Shadow
             SearchBar(
                 inputField = {
                     SearchBarDefaults.InputField(
@@ -192,8 +306,7 @@ fun HomeScreen(
                         placeholder = { 
                             Text(
                                 "Search events near you...",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                style = MaterialTheme.typography.bodyLarge
                             ) 
                         },
                         leadingIcon = { Icon(Icons.Default.Search, null, tint = MaterialTheme.colorScheme.primary) }
@@ -203,17 +316,18 @@ fun HomeScreen(
                 onExpandedChange = {},
                 shape = CircleShape,
                 colors = SearchBarDefaults.colors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                    containerColor = MaterialTheme.colorScheme.surface
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 12.dp)
+                    .shadow(4.dp, CircleShape) // Added shadow for separation
             ) {}
 
-            // 2. Refined Filters with high corner radius and spacing
+            // 2. Refined Filters: Soft solid background, no border for unselected
             LazyRow(
                 contentPadding = PaddingValues(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.padding(bottom = 16.dp)
             ) {
                 items(categories) { category ->
@@ -221,23 +335,19 @@ fun HomeScreen(
                     FilterChip(
                         selected = isSelected,
                         onClick = { viewModel.onCategorySelect(category) },
-                        label = { Text(category, modifier = Modifier.padding(horizontal = 4.dp)) },
+                        label = { Text(category) },
                         shape = RoundedCornerShape(24.dp),
-                        border = if (isSelected) null else FilterChipDefaults.filterChipBorder(
-                            enabled = true,
-                            selected = false,
-                            borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
-                        ),
+                        border = null, // No border as requested
                         colors = FilterChipDefaults.filterChipColors(
                             selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
                             selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                            containerColor = Color.Transparent
+                            containerColor = MaterialTheme.colorScheme.surface, // Solid background
+                            labelColor = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     )
                 }
             }
 
-            // Error Message Box
             if (uiState.error != null) {
                 ErrorAlertBox(message = uiState.error!!)
             }
@@ -249,38 +359,61 @@ fun HomeScreen(
                         cameraPositionState = cameraPositionState,
                         uiSettings = MapUiSettings(
                             zoomControlsEnabled = false,
-                            myLocationButtonEnabled = true
+                            myLocationButtonEnabled = false // Keep it clean
                         ),
                         properties = MapProperties(
                             isMyLocationEnabled = true,
-                            mapStyleOptions = MapStyleOptions(MAP_STYLE_JSON)
+                            mapStyleOptions = MapStyleOptions(MAP_STYLE_JSON) // Minimalist Silver Style
                         )
                     ) {
                         if (showHeatmap && heatmapTileProvider != null) {
                             TileOverlay(tileProvider = heatmapTileProvider)
                         } else {
                             displayEvents.forEach { event ->
-                                Marker(
+                                MarkerComposable(
                                     state = MarkerState(position = LatLng(event.lat, event.lng)),
                                     title = event.title,
-                                    snippet = "${event.category} • ${event.attendees.size} going",
                                     onClick = {
                                         onEventDetail(event.id)
                                         true
                                     }
-                                )
+                                ) {
+                                    // Purple Accent Markers
+                                    Surface(
+                                        modifier = Modifier.size(36.dp),
+                                        shape = CircleShape,
+                                        color = MaterialTheme.colorScheme.primary, // Purple accent
+                                        border = BorderStroke(2.dp, Color.White),
+                                        shadowElevation = 4.dp
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Icon(
+                                                imageVector = when(event.category) {
+                                                    "Music" -> Icons.Default.MusicNote
+                                                    "Sports" -> Icons.Default.SportsBasketball
+                                                    "Food" -> Icons.Default.Restaurant
+                                                    else -> Icons.Default.LocationOn
+                                                },
+                                                contentDescription = null,
+                                                tint = Color.White,
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
 
-                    // 3. Refined FAB (Heatmap Toggle)
+                    // 3. Spaced FAB matching navigation color tones
                     LargeFloatingActionButton(
                         onClick = { showHeatmap = !showHeatmap },
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
                             .padding(24.dp)
-                            .padding(bottom = 32.dp), // Higher to avoid Google logo
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            .padding(bottom = 32.dp), // Spaced from edge
+                        containerColor = MaterialTheme.colorScheme.primaryContainer, // Match nav/accent tone
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                         shape = RoundedCornerShape(20.dp)
                     ) {
                         Icon(
@@ -300,11 +433,7 @@ fun HomeScreen(
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 CircularProgressIndicator()
                                 Spacer(Modifier.height(16.dp))
-                                Text(
-                                    "Fetching events near you...",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
+                                Text("Fetching events...", style = MaterialTheme.typography.bodyMedium)
                             }
                         }
                     }
@@ -312,18 +441,17 @@ fun HomeScreen(
             } else {
                 LazyColumn(
                     contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    // ... (List items implementation remains largely same, maybe refined)
                     if (uiState.recommendedEvents.isNotEmpty() && uiState.searchQuery.isEmpty() && uiState.selectedCategory == "All") {
                         item {
                             Text(
                                 "Recommended for you",
                                 style = MaterialTheme.typography.titleMedium,
-                                modifier = Modifier.padding(vertical = 8.dp)
+                                modifier = Modifier.padding(bottom = 12.dp)
                             )
                             LazyRow(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 items(uiState.recommendedEvents) { event ->
@@ -332,27 +460,13 @@ fun HomeScreen(
                             }
                             Spacer(Modifier.height(16.dp))
                             HorizontalDivider()
-                            Spacer(Modifier.height(8.dp))
+                            Spacer(Modifier.height(16.dp))
                         }
                     }
 
                     if (displayEvents.isEmpty()) {
                         item {
-                            Box(
-                                modifier = Modifier.fillMaxWidth().height(200.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Icon(
-                                        Icons.Default.EventBusy,
-                                        null,
-                                        modifier = Modifier.size(48.dp),
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                    Spacer(Modifier.height(8.dp))
-                                    Text("No events found", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                }
-                            }
+                            EmptyState()
                         }
                     } else {
                         items(displayEvents, key = { it.id }) { event ->
@@ -366,15 +480,38 @@ fun HomeScreen(
 }
 
 @Composable
+fun EmptyState() {
+    Box(
+        modifier = Modifier.fillMaxWidth().height(300.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(
+                Icons.Default.SearchOff,
+                null,
+                modifier = Modifier.size(64.dp),
+                tint = MaterialTheme.colorScheme.outline
+            )
+            Spacer(Modifier.height(16.dp))
+            Text(
+                "No events found nearby", 
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
 fun ErrorAlertBox(message: String) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFFFEBEE) // Light Pink
+            containerColor = Color(0xFFFFEBEE)
         ),
-        border = BorderStroke(1.dp, Color(0xFFEF5350)), // Muted Red
+        border = BorderStroke(1.dp, Color(0xFFEF5350)),
         shape = RoundedCornerShape(12.dp)
     ) {
         Row(
@@ -382,16 +519,8 @@ fun ErrorAlertBox(message: String) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Icon(
-                Icons.Default.Error,
-                contentDescription = null,
-                tint = Color(0xFFC62828) // Dark Crimson
-            )
-            Text(
-                text = message,
-                color = Color(0xFFC62828), // Dark Crimson
-                style = MaterialTheme.typography.bodyMedium
-            )
+            Icon(Icons.Default.Error, null, tint = Color(0xFFC62828))
+            Text(message, color = Color(0xFFC62828), style = MaterialTheme.typography.bodyMedium)
         }
     }
 }
@@ -400,23 +529,23 @@ fun ErrorAlertBox(message: String) {
 fun RecommendationCard(event: Event, onClick: () -> Unit) {
     Card(
         onClick = onClick, 
-        modifier = Modifier.width(200.dp),
-        shape = RoundedCornerShape(16.dp)
+        modifier = Modifier.width(220.dp),
+        shape = RoundedCornerShape(20.dp)
     ) {
-        Column(modifier = Modifier.padding(12.dp)) {
+        Column {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(100.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)),
+                    .height(110.dp)
+                    .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Default.AutoAwesome, null, modifier = Modifier.size(32.dp), tint = MaterialTheme.colorScheme.primary)
+                Icon(Icons.Default.AutoAwesome, null, modifier = Modifier.size(40.dp), tint = MaterialTheme.colorScheme.primary)
             }
-            Spacer(Modifier.height(8.dp))
-            Text(event.title, style = MaterialTheme.typography.titleSmall, maxLines = 1)
-            Text(event.category, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+            Column(modifier = Modifier.padding(12.dp)) {
+                Text(event.title, style = MaterialTheme.typography.titleSmall, maxLines = 1)
+                Text(event.category, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+            }
         }
     }
 }
@@ -426,23 +555,18 @@ fun EventCard(event: Event, onClick: () -> Unit) {
     Card(
         onClick = onClick, 
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Row(
-            modifier = Modifier.padding(12.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Surface(
-                modifier = Modifier.size(56.dp),
-                shape = RoundedCornerShape(12.dp),
-                color = when (event.category) {
-                    "Music" -> Color(0xFFE1BEE7) // Light Purple
-                    "Sports" -> Color(0xFFBBDEFB) // Light Blue
-                    "Food" -> Color(0xFFFFE0B2) // Light Orange
-                    else -> MaterialTheme.colorScheme.surfaceVariant
-                }
+                modifier = Modifier.size(52.dp),
+                shape = RoundedCornerShape(14.dp),
+                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
@@ -453,7 +577,7 @@ fun EventCard(event: Event, onClick: () -> Unit) {
                             else -> Icons.Default.Event
                         },
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
             }

@@ -66,51 +66,6 @@ private const val MAP_STYLE_JSON = """
     ]
   },
   {
-    "featureType": "administrative.land_parcel",
-    "elementType": "labels.text.fill",
-    "stylers": [
-      {
-        "color": "#bdbdbd"
-      }
-    ]
-  },
-  {
-    "featureType": "poi",
-    "elementType": "geometry",
-    "stylers": [
-      {
-        "color": "#eeeeee"
-      }
-    ]
-  },
-  {
-    "featureType": "poi",
-    "elementType": "labels.text.fill",
-    "stylers": [
-      {
-        "color": "#757575"
-      }
-    ]
-  },
-  {
-    "featureType": "poi.park",
-    "elementType": "geometry",
-    "stylers": [
-      {
-        "color": "#e5e5e5"
-      }
-    ]
-  },
-  {
-    "featureType": "poi.park",
-    "elementType": "labels.text.fill",
-    "stylers": [
-      {
-        "color": "#9e9e9e"
-      }
-    ]
-  },
-  {
     "featureType": "road",
     "elementType": "geometry",
     "stylers": [
@@ -120,74 +75,11 @@ private const val MAP_STYLE_JSON = """
     ]
   },
   {
-    "featureType": "road.arterial",
-    "elementType": "labels.text.fill",
-    "stylers": [
-      {
-        "color": "#757575"
-      }
-    ]
-  },
-  {
-    "featureType": "road.highway",
-    "elementType": "geometry",
-    "stylers": [
-      {
-        "color": "#dadada"
-      }
-    ]
-  },
-  {
-    "featureType": "road.highway",
-    "elementType": "labels.text.fill",
-    "stylers": [
-      {
-        "color": "#616161"
-      }
-    ]
-  },
-  {
-    "featureType": "road.local",
-    "elementType": "labels.text.fill",
-    "stylers": [
-      {
-        "color": "#9e9e9e"
-      }
-    ]
-  },
-  {
-    "featureType": "transit.line",
-    "elementType": "geometry",
-    "stylers": [
-      {
-        "color": "#e5e5e5"
-      }
-    ]
-  },
-  {
-    "featureType": "transit.station",
-    "elementType": "geometry",
-    "stylers": [
-      {
-        "color": "#eeeeee"
-      }
-    ]
-  },
-  {
     "featureType": "water",
     "elementType": "geometry",
     "stylers": [
       {
-        "color": "#c9c9c9"
-      }
-    ]
-  },
-  {
-    "featureType": "water",
-    "elementType": "labels.text.fill",
-    "stylers": [
-      {
-        "color": "#9e9e9e"
+        "color": "#e9e9e9"
       }
     ]
   }
@@ -216,17 +108,6 @@ fun HomeScreen(
         uiState.selectedCategory != "All"
     ) uiState.filteredEvents else uiState.nearbyEvents
 
-    val heatmapData = remember(displayEvents) {
-        displayEvents.map { LatLng(it.lat, it.lng) }
-    }
-    val heatmapTileProvider = remember(heatmapData) {
-        if (heatmapData.isNotEmpty()) {
-            HeatmapTileProvider.Builder()
-                .data(heatmapData)
-                .build()
-        } else null
-    }
-
     val userLocation = uiState.userLocation ?: LatLng(20.5937, 78.9629)
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(userLocation, 12f)
@@ -241,55 +122,68 @@ fun HomeScreen(
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
-            // Refined Navigation Bar with tighter indicator pill
-            NavigationBar(
-                tonalElevation = 8.dp
+            // Refined Navigation Bar with custom tonal elevation and compact style
+            Surface(
+                shadowElevation = 8.dp,
+                color = MaterialTheme.colorScheme.surface
             ) {
-                NavigationBarItem(
-                    selected = showMap,
-                    onClick = { showMap = true },
-                    icon = { Icon(Icons.Default.Map, null) },
-                    label = { Text("Map") }
-                )
-                NavigationBarItem(
-                    selected = !showMap,
-                    onClick = { showMap = false },
-                    icon = { Icon(Icons.AutoMirrored.Filled.List, null) },
-                    label = { Text("List") }
-                )
-                NavigationBarItem(
-                    selected = false,
-                    onClick = onCreateEvent,
-                    icon = {
-                        Icon(Icons.Default.Add, null,
-                            tint = MaterialTheme.colorScheme.primary)
-                    },
-                    label = { Text("Create") }
-                )
-                NavigationBarItem(
-                    selected = false,
-                    onClick = onAlerts,
-                    icon = {
-                        BadgedBox(
-                            badge = {
-                                if (alertsState.unreadCount > 0) {
-                                    Badge {
-                                        Text(alertsState.unreadCount.toString())
+                NavigationBar(
+                    containerColor = Color.Transparent,
+                    tonalElevation = 0.dp,
+                    modifier = Modifier.height(80.dp)
+                ) {
+                    NavigationBarItem(
+                        selected = showMap,
+                        onClick = { showMap = true },
+                        icon = { Icon(Icons.Default.Map, null) },
+                        label = { Text("Map") },
+                        colors = NavigationBarItemDefaults.colors(
+                            indicatorColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)
+                        )
+                    )
+                    NavigationBarItem(
+                        selected = !showMap,
+                        onClick = { showMap = false },
+                        icon = { Icon(Icons.AutoMirrored.Filled.List, null) },
+                        label = { Text("List") },
+                        colors = NavigationBarItemDefaults.colors(
+                            indicatorColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)
+                        )
+                    )
+                    NavigationBarItem(
+                        selected = false,
+                        onClick = onCreateEvent,
+                        icon = {
+                            Icon(Icons.Default.Add, null,
+                                tint = MaterialTheme.colorScheme.primary)
+                        },
+                        label = { Text("Create") }
+                    )
+                    NavigationBarItem(
+                        selected = false,
+                        onClick = onAlerts,
+                        icon = {
+                            BadgedBox(
+                                badge = {
+                                    if (alertsState.unreadCount > 0) {
+                                        Badge {
+                                            Text(alertsState.unreadCount.toString())
+                                        }
                                     }
                                 }
+                            ) {
+                                Icon(Icons.Default.Notifications, null)
                             }
-                        ) {
-                            Icon(Icons.Default.Notifications, null)
-                        }
-                    },
-                    label = { Text("Alerts") }
-                )
-                NavigationBarItem(
-                    selected = false,
-                    onClick = onProfile,
-                    icon = { Icon(Icons.Default.Person, null) },
-                    label = { Text("Profile") }
-                )
+                        },
+                        label = { Text("Alerts") }
+                    )
+                    NavigationBarItem(
+                        selected = false,
+                        onClick = onProfile,
+                        icon = { Icon(Icons.Default.Person, null) },
+                        label = { Text("Profile") }
+                    )
+                }
             }
         }
     ) { padding ->
@@ -298,7 +192,7 @@ fun HomeScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            // 1. Refined Search Bar with Shadow (Floating Effect)
+            // 1. Floating Search Bar with Soft Shadow (Elevation 3)
             SearchBar(
                 inputField = {
                     SearchBarDefaults.InputField(
@@ -308,10 +202,7 @@ fun HomeScreen(
                         expanded = false,
                         onExpandedChange = {},
                         placeholder = { 
-                            Text(
-                                "Search events near you...",
-                                style = MaterialTheme.typography.bodyLarge
-                            ) 
+                            Text("Search events near you...", style = MaterialTheme.typography.bodyLarge) 
                         },
                         leadingIcon = { Icon(Icons.Default.Search, null, tint = MaterialTheme.colorScheme.primary) }
                     )
@@ -325,10 +216,10 @@ fun HomeScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 12.dp)
-                    .shadow(elevation = 6.dp, shape = CircleShape, ambientColor = Color.Black.copy(alpha = 0.2f))
+                    .shadow(elevation = 3.dp, shape = CircleShape) // Added soft shadow for separation
             ) {}
 
-            // 2. Refined Category Chips: Solid white background, no border for inactive
+            // 2. Category Chips: Solid white background, no border for inactive
             LazyRow(
                 contentPadding = PaddingValues(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -341,11 +232,11 @@ fun HomeScreen(
                         onClick = { viewModel.onCategorySelect(category) },
                         label = { Text(category) },
                         shape = RoundedCornerShape(24.dp),
-                        border = null, // Removed border as requested
+                        border = null, // Removed border
                         colors = FilterChipDefaults.filterChipColors(
                             selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
                             selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                            containerColor = MaterialTheme.colorScheme.surface, // Solid background
+                            containerColor = Color.White, // Solid white background for inactive
                             labelColor = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     )
@@ -370,51 +261,47 @@ fun HomeScreen(
                             mapStyleOptions = MapStyleOptions(MAP_STYLE_JSON)
                         )
                     ) {
-                        if (showHeatmap && heatmapTileProvider != null) {
-                            TileOverlay(tileProvider = heatmapTileProvider)
-                        } else {
-                            displayEvents.forEach { event ->
-                                MarkerComposable(
-                                    state = MarkerState(position = LatLng(event.lat, event.lng)),
-                                    title = event.title,
-                                    onClick = {
-                                        onEventDetail(event.id)
-                                        true
-                                    }
+                        displayEvents.forEach { event ->
+                            MarkerComposable(
+                                state = MarkerState(position = LatLng(event.lat, event.lng)),
+                                title = event.title,
+                                onClick = {
+                                    onEventDetail(event.id)
+                                    true
+                                }
+                            ) {
+                                // Purple Accent Markers
+                                Surface(
+                                    modifier = Modifier.size(32.dp),
+                                    shape = CircleShape,
+                                    color = MaterialTheme.colorScheme.primary, // Purple accent
+                                    border = BorderStroke(2.dp, Color.White),
+                                    shadowElevation = 4.dp
                                 ) {
-                                    // Purple Accent Markers
-                                    Surface(
-                                        modifier = Modifier.size(36.dp),
-                                        shape = CircleShape,
-                                        color = MaterialTheme.colorScheme.primary,
-                                        border = BorderStroke(2.dp, Color.White),
-                                        shadowElevation = 4.dp
-                                    ) {
-                                        Box(contentAlignment = Alignment.Center) {
-                                            Icon(
-                                                imageVector = when(event.category) {
-                                                    "Music" -> Icons.Default.MusicNote
-                                                    "Sports" -> Icons.Default.SportsBasketball
-                                                    "Food" -> Icons.Default.Restaurant
-                                                    else -> Icons.Default.LocationOn
-                                                },
-                                                contentDescription = null,
-                                                tint = Color.White,
-                                                modifier = Modifier.size(20.dp)
-                                            )
-                                        }
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Icon(
+                                            imageVector = when(event.category) {
+                                                "Music" -> Icons.Default.MusicNote
+                                                "Sports" -> Icons.Default.SportsBasketball
+                                                "Food" -> Icons.Default.Restaurant
+                                                else -> Icons.Default.LocationOn
+                                            },
+                                            contentDescription = null,
+                                            tint = Color.White,
+                                            modifier = Modifier.size(18.dp)
+                                        )
                                     }
                                 }
                             }
                         }
                     }
 
-                    // 3. Floating Action Button: Repositioned with bottom padding
+                    // 3. Floating Action Button: Shifted up to avoid overlap
                     LargeFloatingActionButton(
                         onClick = { showHeatmap = !showHeatmap },
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
-                            .padding(end = 24.dp, bottom = 48.dp), // Increased bottom padding (shifted up ~24dp)
+                            .padding(end = 24.dp, bottom = 48.dp), // Spaced safely above map toggles
                         containerColor = MaterialTheme.colorScheme.primaryContainer,
                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                         shape = RoundedCornerShape(20.dp)
@@ -433,11 +320,7 @@ fun HomeScreen(
                                 .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.5f)),
                             contentAlignment = Alignment.Center
                         ) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                CircularProgressIndicator()
-                                Spacer(Modifier.height(16.dp))
-                                Text("Fetching events...", style = MaterialTheme.typography.bodyMedium)
-                            }
+                            CircularProgressIndicator()
                         }
                     }
                 }
@@ -489,18 +372,9 @@ fun EmptyState() {
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(
-                Icons.Default.SearchOff,
-                null,
-                modifier = Modifier.size(64.dp),
-                tint = MaterialTheme.colorScheme.outline
-            )
+            Icon(Icons.Default.SearchOff, null, modifier = Modifier.size(64.dp), tint = MaterialTheme.colorScheme.outline)
             Spacer(Modifier.height(16.dp))
-            Text(
-                "No events found nearby", 
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Text("No events found nearby", style = MaterialTheme.typography.titleMedium)
         }
     }
 }
@@ -508,12 +382,8 @@ fun EmptyState() {
 @Composable
 fun ErrorAlertBox(message: String) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFFFEBEE)
-        ),
+        modifier = Modifier.fillMaxWidth().padding(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFEBEE)),
         border = BorderStroke(1.dp, Color(0xFFEF5350)),
         shape = RoundedCornerShape(12.dp)
     ) {
@@ -586,11 +456,7 @@ fun EventCard(event: Event, onClick: () -> Unit) {
             }
             Column(modifier = Modifier.weight(1f)) {
                 Text(event.title, style = MaterialTheme.typography.titleMedium, maxLines = 1)
-                Text(
-                    "${event.category} • ${event.attendees.size} going", 
-                    style = MaterialTheme.typography.bodySmall, 
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Text("${event.category} • ${event.attendees.size} going", style = MaterialTheme.typography.bodySmall)
             }
             Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = MaterialTheme.colorScheme.outline)
         }

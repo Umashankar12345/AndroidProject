@@ -30,6 +30,7 @@ import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.maps.android.compose.*
 import com.google.maps.android.heatmaps.HeatmapTileProvider
 
+// Custom Silver/Minimalist Map Style
 private const val MAP_STYLE_JSON = """
 [
   {
@@ -240,7 +241,10 @@ fun HomeScreen(
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
-            NavigationBar {
+            // Refined Navigation Bar with tighter indicator pill
+            NavigationBar(
+                tonalElevation = 8.dp
+            ) {
                 NavigationBarItem(
                     selected = showMap,
                     onClick = { showMap = true },
@@ -294,7 +298,7 @@ fun HomeScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            // 1. Refined Search Bar with Shadow
+            // 1. Refined Search Bar with Shadow (Floating Effect)
             SearchBar(
                 inputField = {
                     SearchBarDefaults.InputField(
@@ -321,10 +325,10 @@ fun HomeScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 12.dp)
-                    .shadow(4.dp, CircleShape) // Added shadow for separation
+                    .shadow(elevation = 6.dp, shape = CircleShape, ambientColor = Color.Black.copy(alpha = 0.2f))
             ) {}
 
-            // 2. Refined Filters: Soft solid background, no border for unselected
+            // 2. Refined Category Chips: Solid white background, no border for inactive
             LazyRow(
                 contentPadding = PaddingValues(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -337,7 +341,7 @@ fun HomeScreen(
                         onClick = { viewModel.onCategorySelect(category) },
                         label = { Text(category) },
                         shape = RoundedCornerShape(24.dp),
-                        border = null, // No border as requested
+                        border = null, // Removed border as requested
                         colors = FilterChipDefaults.filterChipColors(
                             selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
                             selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -359,11 +363,11 @@ fun HomeScreen(
                         cameraPositionState = cameraPositionState,
                         uiSettings = MapUiSettings(
                             zoomControlsEnabled = false,
-                            myLocationButtonEnabled = false // Keep it clean
+                            myLocationButtonEnabled = false
                         ),
                         properties = MapProperties(
                             isMyLocationEnabled = true,
-                            mapStyleOptions = MapStyleOptions(MAP_STYLE_JSON) // Minimalist Silver Style
+                            mapStyleOptions = MapStyleOptions(MAP_STYLE_JSON)
                         )
                     ) {
                         if (showHeatmap && heatmapTileProvider != null) {
@@ -382,7 +386,7 @@ fun HomeScreen(
                                     Surface(
                                         modifier = Modifier.size(36.dp),
                                         shape = CircleShape,
-                                        color = MaterialTheme.colorScheme.primary, // Purple accent
+                                        color = MaterialTheme.colorScheme.primary,
                                         border = BorderStroke(2.dp, Color.White),
                                         shadowElevation = 4.dp
                                     ) {
@@ -405,14 +409,13 @@ fun HomeScreen(
                         }
                     }
 
-                    // 3. Spaced FAB matching navigation color tones
+                    // 3. Floating Action Button: Repositioned with bottom padding
                     LargeFloatingActionButton(
                         onClick = { showHeatmap = !showHeatmap },
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
-                            .padding(24.dp)
-                            .padding(bottom = 32.dp), // Spaced from edge
-                        containerColor = MaterialTheme.colorScheme.primaryContainer, // Match nav/accent tone
+                            .padding(end = 24.dp, bottom = 48.dp), // Increased bottom padding (shifted up ~24dp)
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                         shape = RoundedCornerShape(20.dp)
                     ) {

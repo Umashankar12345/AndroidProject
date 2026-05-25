@@ -1,6 +1,6 @@
 package com.example.nearmeet.ui.navigation
 
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -32,12 +32,29 @@ sealed class Screen(val route: String) {
 fun NearMeetNavGraph(
     navController: NavHostController = rememberNavController()
 ) {
-    val currentUser = FirebaseAuth.getInstance().currentUser
-    val startDestination = if (currentUser != null) Screen.Home.route else Screen.Login.route
+    // Keep track of the current user reactively
+    var authStateReady by remember { mutableStateOf(false) }
+    var isLoggedIn by remember { mutableStateOf(FirebaseAuth.getInstance().currentUser != null) }
+
+    DisposableEffect(Unit) {
+        val listener = FirebaseAuth.AuthStateListener { auth ->
+            isLoggedIn = auth.currentUser != null
+            authStateReady = true
+        }
+        FirebaseAuth.getInstance().addAuthStateListener(listener)
+        onDispose {
+            FirebaseAuth.getInstance().removeAuthStateListener(listener)
+        }
+    }
+
+    if (!authStateReady) {
+        // Optional: Show a splash screen or empty box while checking auth
+        return
+    }
 
     NavHost(
         navController = navController,
-        startDestination = startDestination
+        startDestination = if (isLoggedIn) Screen.Home.route else Screen.Login.route
     ) {
         composable(Screen.Login.route) {
             LoginScreen(

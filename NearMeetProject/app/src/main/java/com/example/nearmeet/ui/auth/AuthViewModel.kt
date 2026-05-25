@@ -13,7 +13,6 @@ class AuthViewModel @Inject constructor(
     private val authRepository: AuthRepository
 ) : ViewModel() {
 
-    // Derived state from the repository's currentUser flow
     val isLoggedIn: StateFlow<Boolean> = authRepository.currentUser
         .map { it != null }
         .stateIn(
@@ -34,10 +33,9 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             _isLoading.value = true
             _error.value = null
-            authRepository.loginWithEmail(email.trim(), pass.trim()) { success, msg ->
-                _isLoading.value = false
-                if (!success) _error.value = msg
-            }
+            val result = authRepository.loginWithEmail(email.trim(), pass.trim())
+            _isLoading.value = false
+            result.onFailure { _error.value = it.message }
         }
     }
 
@@ -47,21 +45,24 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             _isLoading.value = true
             _error.value = null
-            authRepository.signUpWithEmail(email.trim(), pass.trim()) { success, msg ->
-                _isLoading.value = false
-                if (!success) _error.value = msg
-            }
+            val result = authRepository.signUpWithEmail(email.trim(), pass.trim())
+            _isLoading.value = false
+            result.onFailure { _error.value = it.message }
         }
     }
 
     private fun validate(email: String, pass: String): Boolean {
-        return if (email.isBlank() || pass.isBlank()) {
-            _error.value = "Fields cannot be empty"
-            false
-        } else if (pass.length < 6) {
-            _error.value = "Password must be at least 6 characters"
-            false
-        } else true
+        return when {
+            email.isBlank() || pass.isBlank() -> {
+                _error.value = "Fields cannot be empty"
+                false
+            }
+            pass.length < 6 -> {
+                _error.value = "Password must be at least 6 characters"
+                false
+            }
+            else -> true
+        }
     }
 
     fun clearError() {

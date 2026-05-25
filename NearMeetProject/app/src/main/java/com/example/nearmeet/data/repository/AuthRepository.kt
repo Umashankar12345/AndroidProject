@@ -2,8 +2,12 @@ package com.example.nearmeet.data.repository
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -20,18 +24,24 @@ class AuthRepository @Inject constructor(
         }
     }
 
-    fun loginWithEmail(email: String, pass: String, onComplete: (Boolean, String?) -> Unit) {
-        auth.signInWithEmailAndPassword(email, pass)
-            .addOnCompleteListener { task ->
-                onComplete(task.isSuccessful, task.exception?.message)
-            }
+    suspend fun loginWithEmail(email: String, pass: String): Result<FirebaseUser> {
+        return try {
+            val result = auth.signInWithEmailAndPassword(email, pass).await()
+            result.user?.let { Result.success(it) } 
+                ?: Result.failure(Exception("Login failed: User is null"))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
-    fun signUpWithEmail(email: String, pass: String, onComplete: (Boolean, String?) -> Unit) {
-        auth.createUserWithEmailAndPassword(email, pass)
-            .addOnCompleteListener { task ->
-                onComplete(task.isSuccessful, task.exception?.message)
-            }
+    suspend fun signUpWithEmail(email: String, pass: String): Result<FirebaseUser> {
+        return try {
+            val result = auth.createUserWithEmailAndPassword(email, pass).await()
+            result.user?.let { Result.success(it) }
+                ?: Result.failure(Exception("Registration failed: User is null"))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
     fun logout() {

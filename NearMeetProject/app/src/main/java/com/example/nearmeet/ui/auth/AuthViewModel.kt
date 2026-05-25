@@ -4,8 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.nearmeet.data.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -14,40 +13,58 @@ class AuthViewModel @Inject constructor(
     private val authRepository: AuthRepository
 ) : ViewModel() {
 
-    private val _isLoggedIn = MutableStateFlow(authRepository.isUserLoggedIn)
-    val isLoggedIn: StateFlow<Boolean> = _isLoggedIn
+    // Derived state from the repository's currentUser flow
+    val isLoggedIn: StateFlow<Boolean> = authRepository.currentUser
+        .map { it != null }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = authRepository.isUserLoggedIn
+        )
+
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading
 
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
 
     fun login(email: String, pass: String) {
-        if (email.isBlank() || pass.isBlank()) {
-            _error.value = "Email and password cannot be empty"
-            return
-        }
-        authRepository.loginWithEmail(email.trim(), pass.trim()) { success, msg ->
-            if (success) _isLoggedIn.value = true
-            else _error.value = msg
+        if (!validate(email, pass)) return
+        
+        viewModelScope.launch {
+            _isLoading.value = true
+            _error.value = null
+            authRepository.loginWithEmail(email.trim(), pass.trim()) { success, msg ->
+                _isLoading.value = false
+                if (!success) _error.value = msg
+            }
         }
     }
 
     fun signUp(email: String, pass: String) {
-        if (email.isBlank() || pass.isBlank()) {
-            _error.value = "Email and password cannot be empty"
-            return
+        if (!validate(email, pass)) return
+        
+        viewModelScope.launch {
+            _isLoading.value = true
+            _error.value = null
+            authRepository.signUpWithEmail(email.trim(), pass.trim()) { success, msg ->
+                _isLoading.value = false
+                if (!success) _error.value = msg
+            }
         }
-        authRepository.signUpWithEmail(email.trim(), pass.trim()) { success, msg ->
-            if (success) _isLoggedIn.value = true
-            else _error.value = msg
-        }
+    }
+
+    private fun validate(email: String, pass: String): Boolean {
+        return if (email.isBlank() || pass.isBlank()) {
+            _error.value = "Fields cannot be empty"
+            false
+        } else if (pass.length < 6) {
+            _error.value = "Password must be at least 6 characters"
+            false
+        } else true
     }
 
     fun clearError() {
         _error.value = null
-    }
-
-    fun logout() {
-        authRepository.logout()
-        _isLoggedIn.value = false
     }
 }

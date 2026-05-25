@@ -10,9 +10,9 @@
               <option name="connection">
                 <ConnectionSetting>
                   <option name="appId" value="com.example.nearmeet" />
-                  <option name="mobileSdkAppId" value="1:1014548815309:android:72ab808f6018ffab2ff884" />
-                  <option name="projectId" value="nearmeet-ea934" />
-                  <option name="projectNumber" value="1014548815309" />
+                  <option name="mobileSdkAppId" value="1:896864808361:android:cf3d3d7246b81bd0bba8b8" />
+                  <option name="projectId" value="project-ae67e867-d004-49e9-b56" />
+                  <option name="projectNumber" value="896864808361" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

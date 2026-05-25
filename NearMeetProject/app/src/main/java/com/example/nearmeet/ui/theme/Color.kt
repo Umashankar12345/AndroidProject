@@ -1,23 +1,26 @@
 package com.example.nearmeet.ui.theme
 
-
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+// Premium Gradient Palette
+val PrimaryPurple = Color(0xFF7C4DFF)
+val SecondaryPink = Color(0xFFFF4DA6)
+val NearMeetAccent = Color(0xFF00E5FF) // Cyber Blue for highlights
+
+val DarkSurface = Color(0xFF121212)
+val LightSurface = Color(0xFFFFFFFF)
+
+// NearMeet Category Colors (Vibrant)
+val MusicColor = Color(0xFF7C4DFF)
+val SportsColor = Color(0xFFFF5252)
+val FoodColor = Color(0xFFFFAB40)
+val TechColor = Color(0xFF00E5FF)
+val ArtColor = Color(0xFFE040FB)
 
 val Purple40 = Color(0xFF6650A4)
 val PurpleGrey40 = Color(0xFF625B71)
 val Pink40 = Color(0xFF7D5260)
 
-// NearMeet theme colors
 val NearMeetBackground = Color(0xFFFDFBFF)
 val NearMeetSurface = Color(0xFFFDFBFF)
-val NearMeetPrimary = Color(0xFF6750A4)
-
-// NearMeet category colors
-val MusicBlue = Color(0xFF4A90E2)
-val SportsGreen = Color(0xFF27AE60)
-val FoodOrange = Color(0xFFE67E22)
-val ArtPurple = Color(0xFF9B59B6)
+val NearMeetPrimary = Color(0xFF7C4DFF)

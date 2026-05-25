@@ -1,11 +1,7 @@
 package com.example.nearmeet.ui.navigation
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -37,28 +33,9 @@ sealed class Screen(val route: String) {
 fun NearMeetNavGraph(
     navController: NavHostController = rememberNavController()
 ) {
-    var authStateReady by remember { mutableStateOf(false) }
-    var isLoggedInInitially by remember { mutableStateOf(false) }
-
-    // Listen for the initial auth state
-    LaunchedEffect(Unit) {
-        FirebaseAuth.getInstance().addAuthStateListener { auth ->
-            isLoggedInInitially = auth.currentUser != null
-            authStateReady = true
-        }
-    }
-
-    if (!authStateReady) {
-        // Show a loading spinner while checking if the user is logged in
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
-        return
-    }
-
-    // Determine the start destination once
-    val startDestination = remember { 
-        if (isLoggedInInitially) Screen.Home.route else Screen.Login.route 
+    // Determine start destination immediately based on existing session
+    val startDestination = remember {
+        if (FirebaseAuth.getInstance().currentUser != null) Screen.Home.route else Screen.Login.route
     }
 
     NavHost(
@@ -100,6 +77,7 @@ fun NearMeetNavGraph(
             ProfileScreen(
                 onBack = { navController.popBackStack() },
                 onLogout = {
+                    FirebaseAuth.getInstance().signOut()
                     navController.navigate(Screen.Login.route) {
                         popUpTo(0) { inclusive = true }
                     }

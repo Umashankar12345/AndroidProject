@@ -9,12 +9,12 @@ plugins {
 
 android {
     namespace = "com.example.nearmeet"
-    compileSdk = 35 // Stable SDK version
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.nearmeet"
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -48,7 +48,7 @@ android {
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.6") // Added missing dependency
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.6")
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
@@ -88,6 +88,7 @@ dependencies {
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
     implementation("io.coil-kt:coil-compose:2.7.0")
+    implementation("com.airbnb.android:lottie-compose:6.1.0") // Added for animations
     implementation("androidx.work:work-runtime-ktx:2.9.1")
     implementation("androidx.navigation:navigation-compose:2.8.1")
 }

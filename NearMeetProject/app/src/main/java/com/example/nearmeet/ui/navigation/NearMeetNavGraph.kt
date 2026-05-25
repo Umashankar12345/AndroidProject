@@ -1,6 +1,11 @@
 package com.example.nearmeet.ui.navigation
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -32,29 +37,33 @@ sealed class Screen(val route: String) {
 fun NearMeetNavGraph(
     navController: NavHostController = rememberNavController()
 ) {
-    // Keep track of the current user reactively
     var authStateReady by remember { mutableStateOf(false) }
-    var isLoggedIn by remember { mutableStateOf(FirebaseAuth.getInstance().currentUser != null) }
+    var isLoggedInInitially by remember { mutableStateOf(false) }
 
-    DisposableEffect(Unit) {
-        val listener = FirebaseAuth.AuthStateListener { auth ->
-            isLoggedIn = auth.currentUser != null
+    // Listen for the initial auth state
+    LaunchedEffect(Unit) {
+        FirebaseAuth.getInstance().addAuthStateListener { auth ->
+            isLoggedInInitially = auth.currentUser != null
             authStateReady = true
-        }
-        FirebaseAuth.getInstance().addAuthStateListener(listener)
-        onDispose {
-            FirebaseAuth.getInstance().removeAuthStateListener(listener)
         }
     }
 
     if (!authStateReady) {
-        // Optional: Show a splash screen or empty box while checking auth
+        // Show a loading spinner while checking if the user is logged in
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
         return
+    }
+
+    // Determine the start destination once
+    val startDestination = remember { 
+        if (isLoggedInInitially) Screen.Home.route else Screen.Login.route 
     }
 
     NavHost(
         navController = navController,
-        startDestination = if (isLoggedIn) Screen.Home.route else Screen.Login.route
+        startDestination = startDestination
     ) {
         composable(Screen.Login.route) {
             LoginScreen(

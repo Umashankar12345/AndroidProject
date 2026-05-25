@@ -9,12 +9,12 @@ plugins {
 
 android {
     namespace = "com.example.nearmeet"
-    compileSdk = 36
+    compileSdk = 35 // Stable SDK version
 
     defaultConfig {
         applicationId = "com.example.nearmeet"
         minSdk = 24
-        targetSdk = 36
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -48,6 +48,7 @@ android {
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.6") // Added missing dependency
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
@@ -68,6 +69,7 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-messaging")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.1")
 
     implementation("com.google.maps.android:maps-compose:6.1.0")
     implementation("com.google.maps.android:maps-compose-utils:6.1.0")

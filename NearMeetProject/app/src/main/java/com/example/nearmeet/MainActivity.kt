@@ -1,6 +1,5 @@
 package com.example.nearmeet
 
-
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -18,7 +17,6 @@ class MainActivity : ComponentActivity() {
             NearMeetTheme {
                 NearMeetNavGraph()
             }
-            // NavGraph comes here later
         }
     }
 }

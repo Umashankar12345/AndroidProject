@@ -2,15 +2,19 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.google.ksp)
+
+    alias(libs.plugins.ksp)
 }
 
+
 android {
-    namespace = "com.example.unit6revise"
-    compileSdk = 36
+    namespace = "com.example.unit4revise"
+    compileSdk {
+        version = release(36)
+    }
 
     defaultConfig {
-        applicationId = "com.example.unit6revise"
+        applicationId = "com.example.unit4revise"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
@@ -49,11 +53,6 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
-    
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
-    ksp(libs.androidx.room.compiler)
-
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -61,4 +60,17 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+    implementation("androidx.room:room-runtime:2.6.1")
+    implementation("androidx.room:room-ktx:2.6.1")
+
+    ksp("androidx.room:room-compiler:2.6.1")
 }
+
+//every exam add dependicies
+// what is a deependency
+// implementation("androidx.navigation:navigation-compose:2.8.0")
+//
+//implementation("androidx.room:room-runtime:2.6.1")
+//implementation("androidx.room:room-ktx:2.6.1")
+//
+//ksp("androidx.room:room-compiler:2.6.1")

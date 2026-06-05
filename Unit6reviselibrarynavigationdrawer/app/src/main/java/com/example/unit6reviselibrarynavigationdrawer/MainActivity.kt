@@ -20,6 +20,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Scaffold
@@ -31,6 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -57,13 +59,13 @@ fun   LibraryDrawerApp(){
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
     val  scope = rememberCoroutineScope()
-    val selectedScreen by remember{ mutableStateOf("Books") }
+    var selectedScreen by remember{ mutableStateOf("Books") }
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent =  {
-            ModelDrawerSheet {
+            ModalDrawerSheet {
                 Text(text = "Library Manger",
-                    modifier = Modifier.padding(17.dp),
+                    modifier = Modifier.padding(top = 47.dp),
                     style = MaterialTheme.typography.headlineSmall
                     )
                 NavigationDrawerItem(
